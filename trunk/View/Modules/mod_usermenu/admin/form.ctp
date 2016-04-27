@@ -1,0 +1,1 @@
+<?php echo $this->Form->input('params.menu_id', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Menu'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'empty' => '', 'options' => $helper->getMenus()));?>

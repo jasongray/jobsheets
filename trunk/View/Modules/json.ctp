@@ -1,0 +1,1 @@
+<?php if (isset($json)) { print(json_decode($json, true)); } ?>
