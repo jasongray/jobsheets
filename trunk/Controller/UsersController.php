@@ -61,24 +61,25 @@ class UsersController extends AppController {
 				}
 				$this->User->id = $this->Session->read('Auth.User.id');
 				$this->User->saveField('lastactive', date('Y-m-d H:i:s'));
-				$this->Cookie->write('Auth.User', $this->User->encrypt($this->request->data['User']), false, '7 Days');
+				$this->Cookie->write('session', $this->User->encrypt($this->request->data['User']));
 				return $this->redirect($this->Auth->redirectUrl());
 			} else {
 				$this->Flash->loginError(__('Incorrect Username and/or Password.'));
 				$this->redirect(array('controller' => 'users', 'action' => 'login'));
 			}
 		} else {
-			$cookie = $this->Cookie->read('Auth.User');
+			$cookie = $this->Cookie->read('session');
+			pr($cookie);
 			if (isset($cookie) && !empty($cookie)) {
-				$this->request->data = $this->User->decrypt($this->Cookie->read('Auth.User'));
+				$this->request->data = $this->User->decrypt($this->Cookie->read('session'));
 				if ($this->Auth->login()) {
 					$this->User->id = $this->Session->read('Auth.User.id');
 					$this->User->saveField('lastactive', date('Y-m-d H:i:s'));
-					$this->Cookie->write('Auth.User', $this->User->encrypt($this->request->data['User']), false, '7 Days');
+					$this->Cookie->write('session', $this->User->encrypt($this->request->data['User']));
 					return $this->redirect($this->Auth->redirectUrl());
 				} else {
 					$this->Session->destroy('Auth.User');
-					$this->Cookie->destroy('Auth.User');
+					$this->Cookie->destroy('session');
 					$this->redirect($this->Auth->logout());
 				}
 			}
@@ -96,7 +97,7 @@ class UsersController extends AppController {
 	public function logout() {
 		$this->Flash->loginSuccess('You are now logged out!');
 		$this->Session->destroy('Auth.User');
-		$this->Cookie->destroy('Auth.User');
+		$this->Cookie->destroy('session');
 		$this->redirect($this->Auth->logout());
 	}
 

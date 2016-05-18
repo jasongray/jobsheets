@@ -29,6 +29,7 @@
 						<td><?php echo $this->Html->link($j['Client']['name'], array('action' => 'edit', $j['Job']['id']), array('escape' => false));?></td>
 						<td><?php echo $this->Html->jobStatus($j['Job']['status']); ?></td>
 						<td class="actions">
+							<?php echo $this->Html->link('<i class="fa fa-search"></i>', array('action' => 'view', $j['Job']['id']), array('escape' => false, 'class' => 'bs-tooltip', 'title' => 'View', 'data-toggle' => 'tooltip')); ?>
 							<?php echo $this->Html->link('<i class="fa fa-pencil"></i>', array('action' => 'edit', $j['Job']['id']), array('escape' => false, 'class' => 'bs-tooltip', 'title' => 'Edit', 'data-toggle' => 'tooltip')); ?>
 							<?php echo $this->Html->link('<i class="fa fa-trash"></i>', array('action' => 'delete', $j['Job']['id']), array('escape' => false, 'class' => 'bs-tooltip trash', 'title' => 'Delete', 'data-toggle' => 'tooltip', 'data-alert-msg' => sprintf(__('Are you sure you want to delete job %s?'), $j['Job']['id']))); ?>
 						</td>

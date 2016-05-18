@@ -6,7 +6,7 @@
 <?php echo $this->Html->css(array('datatables', 'plugins/jquery-ui', 'plugins/timepicker', 'plugins/signature-pad'), array('block' => 'css'));?>
 <div class="row">
     <?php echo $this->Form->create('Job', array('class' => 'wizard form-horizontal'));?>
-	<div class="col-xs-12 col-sm-7">
+	<div class="col-xs-12 col-lg-7">
 		<div class="panel panel-midnightblue">
 			<div class="panel-heading">
 				<h4><i class="fa fa-cogs"></i> <?php echo __('Job Details', true);?></h4>
@@ -118,7 +118,8 @@
             </div>
 		</div>
 	</div>
-    <div class="col-xs-12 col-sm-5">
+
+    <div class="col-xs-12 col-md-6 col-lg-5">
         <div class="panel panel-midnightblue">
             <div class="panel-heading">
                 <h4><i class="fa fa-cog"></i> <?php echo __('', true);?></h4>
@@ -148,7 +149,7 @@
         </div>
     </div>
 
-    <div class="col-xs-12 col-sm-5">
+    <div class="col-xs-12 col-md-6 col-lg-5">
         <div class="panel panel-orange">
             <div class="panel-heading">
                 <h4><i class="fa fa-pencil"></i> <?php echo __('Client Signature', true);?></h4>

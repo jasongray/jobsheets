@@ -164,20 +164,61 @@ class JobsController extends AppController {
  */
 	public function add() {
 		if ($this->request->is('post')) {
-			if (isset($this->request->data['Job']['customer_id']) && empty($this->request->data['Job']['postcode_id'])) {
-				$this->request->data['Job'] = array_merge($this->request->data['Job'], $this->Job->Customer->getLocation($this->request->data['Job']['customer_id']));
-			}
-			$this->request->data['Job']['location_id'] = $this->Job->Location->match($this->request->data['Job']);
-			$this->Job->create();
-			if ($this->Job->save($this->request->data)) {
-				$this->joblog($this->Job->id, __('Job created'));
-				$this->Flash->success(__('Location created and Job updated.'));
-				$this->redirect(array('action' => 'edit', $this->Job->id));
+			$continue = true;
+			$this->Job->remove_validation();
+			if (!empty($this->request->data['Job']['customer'])) {
+				$this->Job->set($this->request->data['Job']);
+				$this->Job->validate_create_customer();
+				if (!$this->Job->validates()) {
+					if (isset($this->Job->validationErrors['customer_id'])) {
+						$this->Job->invalidate('customer', $this->Job->validationErrors['customer_id'][0]);
+					}
+					$continue = false;
+				} else {
+					if (empty($this->request->data['Job']['suburb'])) {
+						$this->request->data['Job'] = array_merge($this->request->data['Job'], $this->Job->Customer->getLocation($this->request->data['Job']['customer_id']));
+					} else {
+						$continue = $this->add_validate_location();
+					}
+				}
 			} else {
-				$this->Flash->error(__('Please fix any errors before continuing.'));
+				$this->Job->set($this->request->data['Job']);
+				$continue = $this->add_validate_location();
+			}
+			if ($continue) {
+				$this->Job->set($this->request->data['Job']);
+				if ($this->Job->save($this->request->data)) {
+					$this->joblog($this->Job->id, __('Job created'));
+					$this->Flash->success(__('Location created and Job updated.'));
+					$this->redirect(array('action' => 'edit', $this->Job->id));
+				} else {
+					$this->Flash->error(__('There was an error saving your data.'));
+				}
+			} else {
+				$errors = $this->Job->validationErrors;
+				$this->Flash->error(__('Could not create the Job. Please fix the errors below.'));
 			}
 		}
 		$this->set('customers', $this->Job->Customer->find('list', array('conditions' => array('Customer.client_id' => $this->Session->read('Auth.User.client_id')))));
+	}
+
+/** 
+ * Private (merely because this snippet of code is used twice to return the same data)
+ * Validate the location from post data when creating a job
+ *
+ * @return bool
+ */
+	private function add_validate_location() {
+		$this->Job->validate_create_location();
+		if (!$this->Job->validates()) {
+			if (isset($this->Job->validationErrors['postcode_id'])) {
+				$this->Job->invalidate('suburb', $this->Job->validationErrors['postcode_id'][0]);
+			}
+			return false;
+		} else {
+			$this->request->data['Job']['location_id'] = $this->Job->Location->match($this->request->data['Job']);
+		}
+		return true;
 	}
 
 /**

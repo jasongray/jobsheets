@@ -32,6 +32,46 @@ class Job extends AppModel {
  */
 	public $displayField = '';
 
+/**
+ * Validation Rules
+ *
+ * @var void
+ */
+	public function validate_create_location() {
+		$this->validate = array(
+			'address_street' => array(
+				'rule' => 'notBlank',
+				'message' => __('An address must have a street name'),
+				'required' => false,
+			),
+			'postcode_id' => array(
+				'postcode' => array(
+					'rule' => array('postcodeExists'),
+					'message' => __('Please select a suburb from the dropdown list'),
+					'last' => true,
+					'required' => false,
+				),
+			),
+		);
+	}
+
+	public function validate_create_customer() {
+		$this->validate = array(
+			'customer_id' => array(
+				'customer' => array(
+					'rule' => array('customerExists'),
+					'message' => __('Please select a customer from the list or create a new customer record before continuing'),
+					'last' => true,
+					'required' => false,
+				),
+			),
+		);
+	} 
+
+	public function remove_validation() {
+		$this->validate = array();
+	}
+
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
 /**
@@ -126,9 +166,9 @@ class Job extends AppModel {
 	private function generateID ($timestamp = false, $pad = 2, $base64 = false) {
 		$code = false;
 		if ($timestamp) {
-			$hextime[] = $this->padstr(date('Y', $timestamp), 4);
+			$hextime[] = substr($this->padstr(date('Y', $timestamp), 4), -2);
 			$hextime[] = $this->padstr(decoct(date('m', $timestamp)));
-			//$hextime[] = $this->padstr(decoct(date('d', $timestamp)));
+			$hextime[] = $this->padstr(decoct(date('d', $timestamp)));
 			$hextime[] = $this->padstr(decoct(date('H', $timestamp)));
 			$hextime[] = $this->padstr(decoct(date('i', $timestamp)));
 			$hextime[] = $this->padstr(decoct(date('s', $timestamp)));
@@ -146,5 +186,52 @@ class Job extends AppModel {
 	private function padstr($str, $len = 2) {
 		return str_pad($str, $len, '0', STR_PAD_LEFT);
 	} 	
+
+/**
+ * Check customer id exists when adding job
+ *
+ * @var $check Integar 
+ * @return bool
+ */
+	public function customerExists($check) {
+		if (!empty($check)) {
+			App::uses('Customer', 'Model');
+        	$this->Customer = new Customer();
+			$this->Customer->recursive = -1;
+			return $this->Customer->find('first', array(
+				'conditions' => 
+					array(
+						'client_id' => CakeSession::read('Auth.User.client_id'),
+						'client_meta' => CakeSession::read('Auth.User.client_meta'),
+						'id' => $check['customer_id'],
+					),
+				)
+			);
+		}
+		return false;
+	}
+
+
+/**
+ * Check postcode id exists when adding job
+ *
+ * @var $check Integar 
+ * @return bool
+ */
+	public function postcodeExists($check) {
+		if (!empty($check)) {
+			App::uses('Postcode', 'Model');
+        	$this->Postcode = new Postcode();
+			$this->Postcode->recursive = -1;
+			return $this->Postcode->find('first', array(
+				'conditions' => 
+					array(
+						'id' => $check['postcode_id'],
+					),
+				)
+			);
+		}
+		return false;
+	}
 
 }

@@ -86,12 +86,13 @@ class AppController extends Controller {
  */	
 	public function beforeFilter() {
 		//$this->Auth->allow();
-
+		parent::beforeFilter();
 		$this->Cookie->name = 'JobSheets';
-	    $this->Cookie->time = strtotime('+1 week');
+	    $this->Cookie->time = 7 * 24 * 60 * 60;    // 7 days
 	    $this->Cookie->path = '/';
 	    $this->Cookie->key = 'ao8]$E^d4y0t9194q64%9G_%0G1^B,Wemi1y.i5!m3+[V$_9*6./ex';
 	    $this->Cookie->httpOnly = true;
+	    $this->Cookie->type('aes');
 	}
 
 
@@ -103,7 +104,7 @@ class AppController extends Controller {
  * @return void
  */	
 	public function beforeRender() {
-		$this->set('__cookie', $this->Cookie->read('Auth.User'));
+		$this->set('__cookie', $this->Cookie->read('session'));
 	}
 		
 /**

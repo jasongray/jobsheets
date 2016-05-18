@@ -6,7 +6,7 @@
 <?php echo $this->Html->css(array('datatables', 'plugins/jquery-ui', 'plugins/timepicker', 'plugins/signature-pad'), array('block' => 'css'));?>
 <div class="row">
     <?php echo $this->Form->create('Job', array('class' => 'wizard form-horizontal'));?>
-	<div class="col-xs-12 col-sm-7">
+	<div class="col-xs-12 col-lg-7">
 		<div class="panel panel-midnightblue">
 			<div class="panel-heading">
 				<h4><i class="fa fa-cogs"></i> <?php echo __('Edit Job', true);?></h4>
@@ -54,7 +54,7 @@
             </div>
 		</div>
 	</div>
-    <div class="col-xs-12 col-sm-5">
+    <div class="col-xs-12 col-lg-5">
         <div class="panel panel-midnightblue">
             <div class="panel-heading">
                 <h4><i class="fa fa-user"></i> <?php echo __('Allocate Job', true);?></h4>
@@ -72,7 +72,7 @@
         </div>
     </div>
     <?php if (!empty($this->data['Job']['signoff_sig'])) { ?>
-    <div class="col-xs-12 col-sm-5">
+    <div class="col-xs-12 col-md-6 col-lg-5">
         <div class="panel panel-grape">
             <div class="panel-heading">
                 <h4><i class="fa fa-pencil"></i> <?php echo __('Client Signature', true);?></h4>
@@ -96,7 +96,7 @@
     </div>
     <?php } ?>
     <?php if ($this->data['Job']['status'] > 7) { ?>
-    <div class="col-xs-12 col-sm-5">
+    <div class="col-xs-12 col-md-6 col-lg-5">
         <div class="panel panel-grape">
             <div class="panel-heading">
                 <h4><i class="icon-highlight fa fa-paperclip"></i> <?php echo __('Actions', true);?></h4>

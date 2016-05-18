@@ -81,7 +81,7 @@ class Location extends AppModel {
  * @return mixed Id on true, bool false on error
  */
 	public function match($post = array()) {
-		if (!empty($post) && isset($post['postcode_id'])) {
+		if (!empty($post) && isset($post['postcode_id']) && !empty($post['postcode_id'])) {
 			$this->recursive = -1;
 			$data = array();
 			$data_array = $this->schema();
@@ -90,14 +90,13 @@ class Location extends AppModel {
 					$data[$k] = $v;
 				}
 			}
-			unset($data['id']);unset($data['postcode_id']);unset($data['created']);unset($data['modified']);
+			unset($data['id']);unset($data['created']);unset($data['modified']);
 			$str = implode('-', array_filter($data));
 			$find = 'CONCAT_WS("-", Location.property, Location.unit, Location.address_from, Location.address_to, Location.address_street)';
 			$this->virtualFields = array('location' => $find);
 			if ($_loc = $this->find('first', array('fields' => array('id'), 'conditions' => array("$find LIKE '$str'")))) {
 				return $_loc['Location']['id'];
 			} else {
-				$data['postcode_id'] = $post['postcode_id'];
 				$this->save($data);
 				return $this->id;
 			}
