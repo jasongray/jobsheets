@@ -16,7 +16,7 @@
 					<tr>
 						<th class="icon"><?php echo __('Id');?></th>
 						<th><?php echo $this->Paginator->sort('reference', __('Reference'));?></th>
-						<th><?php echo $this->Paginator->sort('role_id', __('Client'));?></th>
+						<th><?php echo $this->Paginator->sort('client_id', __('Client'));?></th>
 						<th><?php echo $this->Paginator->sort('status', __('Status'));?></th>
 						<th class="actions"><?php echo __('Actions');?></th>
 					</tr>

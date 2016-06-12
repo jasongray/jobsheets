@@ -53,4 +53,23 @@ class AppHelper extends Helper {
 		return $html;
 	}
 
+	public function quoteStatus($sts = null) {
+		$html = sprintf('<span class="%s">%s</span>', 'label label-warning', __('Draft'));
+		switch ($sts) {
+			case '9':
+				$html = sprintf('<span class="%s">%s</span>', 'label label-inverse', __('Cancelled'));
+				break;
+			case '8':
+				$html = sprintf('<span class="%s">%s</span>', 'label label-success', __('Completed'));
+				break;
+			case '2':
+				$html = sprintf('<span class="%s">%s</span>', 'label label-primary', __('Accepted'));
+				break;
+			case '1':
+				$html = sprintf('<span class="%s">%s</span>', 'label label-info', __('Emailed'));
+				break;
+		}
+		return $html;
+	}
+
 }

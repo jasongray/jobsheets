@@ -94,25 +94,41 @@ class User extends AppModel {
 
 	}
 
-	public function decrypt($data = false) {
+	public function decrypt($data = false, $login = false) {
 		$_data = array();
 		if ($data) {
 			if (preg_match('/\-(.*)\-(.*)\-(.*)/', Security::rijndael(base64_decode($data), $this->key, 'decrypt'), $m, false, strlen($this->key))) {
 				$_data['User']['email'] = $m[1];
 				$_data['User']['password'] = $m[3];
 			}
-			
 		}
 		return $_data;
 	}
 
 	public function encrypt($data = false) {
 		if ($data) {
+			if (!is_array($data)) {
+				$data = $this->read(null, $data);
+			}
 			$passwordHasher = new BlowfishPasswordHasher();
-			return base64_encode(Security::rijndael(sprintf($this->code, $this->key, $data['email'], $passwordHasher->hash($data['password'])), $this->key, 'encrypt'));
+			return base64_encode(Security::rijndael(sprintf($this->code, $this->key, $data['User']['email'], $data['User']['password']), $this->key, 'encrypt'));
 		}
 		return false;
 	}
+
+	 public function identify($user = array()) {
+	 	if (!empty($user)) {
+	 		$_user = $this->find('first', array('conditions' => array('email' => $user['User']['email'], 'password' => $user['User']['password'])));
+	 		if (!empty($_user)) {
+	 			unset($_user['User']['password']);
+	 			$_out['User'] = $_user['User'];
+	 			unset($_user['User']);
+	 			$_out['User'] = array_merge($_out['User'], $_user);
+	 			return $_out;
+	 		}
+	 	}
+	 	return false;
+	 }
 
 }
 ?>

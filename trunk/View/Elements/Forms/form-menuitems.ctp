@@ -41,7 +41,7 @@ $(document).ready(function(){
 			$.ajax({
 				type:'GET',
 				cache:false,
-				url:_baseurl+'admin/menuItems/getViews/method:'+method,
+				url:_baseurl+'menuItems/getViews/method:'+method,
 				success:function(html){
 					$('#MenuItemAction').html(html);
 				}

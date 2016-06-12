@@ -444,7 +444,7 @@ class MenuItemsController extends AppController {
 		App::uses('Sanitize', 'Utility');
 		App::uses('Folder', 'Utility');
 		$_folder = (Configure::read('MySite.theme') && $theme)? 'Themed' . DS . Configure::read('MySite.theme') . DS : '' ;
-		$_path = APP . 'View' . DS . $_folder . ucwords($folder) . DS;
+		$_path = APP . 'View' . DS . $_folder . ucwords($folder);
 		$_folder = new Folder($_path);
 		$_ignore = array_merge($ignore, array(
 			'Errors',
@@ -460,11 +460,11 @@ class MenuItemsController extends AppController {
 		foreach($_list[1] as $f){
 			if ($admin) {
 				if (!empty($f) && @strpos($f, '')) {
-					$_name = str_replace(".ctp", '', str_replace($_path, '', $f));
-					$_f[$_name] = $_name;
+					$_name = str_replace(array('\\', '/'), '', str_replace(".ctp", '', str_replace($_path, '', $f)));
+					$_f[$_name] =  $_name;
 				}
 			} else {
-				$_name = str_replace(".ctp", '', str_replace($_path, '', $f));
+				$_name = str_replace(array('\\', '/'), '', str_replace(".ctp", '', str_replace($_path, '', $f)));
 				$_f[$_name] = $_name;
 			}
 		}

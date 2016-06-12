@@ -77,6 +77,7 @@
     	</footer>
 
     </div>
+    <?php echo $this->Html->scriptBlock('var _baseurl = \'' . $this->webroot . '\';');?>
     <?php echo $this->Html->script(array(
     'jquery-1.10.2.min', 
     'jqueryui-1.10.3.min', 

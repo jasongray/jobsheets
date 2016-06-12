@@ -37,7 +37,7 @@ class CustomersController extends AppController {
  */
 	public function get() {
 		$this->autoRender = false;
-		if ($this->request->is('ajax')) {
+		if ($this->request->is('ajax')  && $this->request->is('post')) {
 			$result = $this->Customer->getCustomerString($this->request->data['search']);
 			if ($result) {
 				return json_encode($result);

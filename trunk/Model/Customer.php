@@ -30,9 +30,15 @@ class Customer extends AppModel {
 
 	public function getCustomerString($str) {
 		$array = array();
+		$this->virtualFields = array('address' => 'IFNULL(billing_address, CONCAT(
+			COALESCE(unit, ""), IF(LENGTH(unit), "/", ""), 
+			COALESCE(address_from, ""), IF(LENGTH(address_to), " - ", ""), COALESCE(address_to, ""), IF(LENGTH(address_from), " ", ""), 
+			COALESCE(address_street, ""), IF(LENGTH(address_street), "\r\n", ""), 
+			COALESCE(suburb, ""), IF(LENGTH(suburb), " ", "")
+			))');
 		$result = $this->find('all', array(
 			'fields' => array(
-				'id', 'name'
+				'id', 'name', 'address', 'phone', 'email', 'contact'
 			),
 			'conditions' => array(
 				'OR' => array(
@@ -45,7 +51,7 @@ class Customer extends AppModel {
 		if ($result) {
 			for($i=0; $i<count($result); $i++) {
 				$l = $result[$i];
-				$array[] = array('id' => $l['Customer']['id'], 'customer' => $l['Customer']['name']);
+				$array[] = array('id' => $l['Customer']['id'], 'text' => $l['Customer']['name'], 'params' => array('address' => $l['Customer']['address'], 'phone' => $l['Customer']['phone'], 'email' => $l['Customer']['email'], 'contact' => $l['Customer']['contact']));
 			}
 		}
 		return $array;

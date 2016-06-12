@@ -198,7 +198,7 @@ class MenuHelper extends AppHelper  {
 		}
 		
 		
-		return $this->Html->link($i . $l['MenuItem']['title'] . $prepend, $url, $attr);
+		return $this->Html->link($i . $this->Html->tag('span', $l['MenuItem']['title']) . $prepend, $url, $attr);
 		
 	}
 	

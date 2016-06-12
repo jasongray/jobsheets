@@ -84,6 +84,37 @@ class Quote extends AppModel {
 		)
 	);
 
+/**
+ * Validation Rules
+ *
+ * @var void
+ */
+	public function validate_create_location() {
+		$this->validate = array(
+			'address' => array(
+				'rule' => 'notBlank',
+				'message' => __('Please include an address'),
+				'required' => false,
+			),
+		);
+	}
+
+	public function validate_create_customer() {
+		$this->validate = array(
+			'customer_id' => array(
+				'customer' => array(
+					'rule' => array('customerExists'),
+					'message' => __('Please select a customer from the list or create a new customer record before continuing'),
+					'last' => true,
+					'required' => false,
+				),
+			),
+		);
+	} 
+
+	public function remove_validation() {
+		$this->validate = array();
+	}
 
 	public function beforeSave($options = array()) {
 		if (!isset($this->data['Quote']['id']) && !$this->id) {
@@ -94,6 +125,9 @@ class Quote extends AppModel {
 		}
 		if (empty($this->data['Quote']['client_meta'])) {
 			$this->data['Quote']['client_meta'] = CakeSession::read('Auth.User.client_meta');
+		}
+		if (empty($this->data['Quote']['user_id'])) {
+			$this->data['Quote']['user_id'] = CakeSession::read('Auth.User.id');
 		}
 	    return true;
 
@@ -106,7 +140,7 @@ class Quote extends AppModel {
 	private function generateID ($timestamp = false, $pad = 2, $base64 = false) {
 		$code = false;
 		if ($timestamp) {
-			$hextime[] = $this->padstr(date('Y', $timestamp), 4);
+			$hextime[] = $this->padstr(date('Y', $timestamp), $pad);
 			$hextime[] = $this->padstr(decoct(date('m', $timestamp)));
 			//$hextime[] = $this->padstr(decoct(date('d', $timestamp)));
 			$hextime[] = $this->padstr(decoct(date('H', $timestamp)));
@@ -126,5 +160,72 @@ class Quote extends AppModel {
 	private function padstr($str, $len = 2) {
 		return str_pad($str, $len, '0', STR_PAD_LEFT);
 	} 	
+
+/**
+ * Check customer id exists when adding job
+ *
+ * @var $check Integar 
+ * @return bool
+ */
+	public function customerExists($check) {
+		if (!empty($check)) {
+			App::uses('Customer', 'Model');
+        	$this->Customer = new Customer();
+			$this->Customer->recursive = -1;
+			return $this->Customer->find('first', array(
+				'conditions' => 
+					array(
+						'client_id' => CakeSession::read('Auth.User.client_id'),
+						'client_meta' => CakeSession::read('Auth.User.client_meta'),
+						'id' => $check['customer_id'],
+					),
+				)
+			);
+		}
+		return false;
+	}
+
+
+/**
+ * Check postcode id exists when adding job
+ *
+ * @var $check Integar 
+ * @return bool
+ */
+	public function postcodeExists($check) {
+		if (!empty($check)) {
+			App::uses('Postcode', 'Model');
+        	$this->Postcode = new Postcode();
+			$this->Postcode->recursive = -1;
+			return $this->Postcode->find('first', array(
+				'conditions' => 
+					array(
+						'id' => $check['postcode_id'],
+					),
+				)
+			);
+		}
+		return false;
+	}
+
+/**
+ * Update tax rate into Quote table
+ *
+ * @var $data Array 
+ * @return void
+ */
+	public function updateTax($data = array()) {
+		if (!empty($data) && !empty($data['Quote']['tax_id'])) {
+			App::uses('Tax', 'Model');
+			$this->Tax = new Tax();
+			$t = $this->Tax->read(null, $data['Quote']['tax_id']);
+			if (!empty($t)) {
+				$this->id = $data['Quote']['id'];
+				$this->saveField('tax_rate', $t['Tax']['rate']);
+				$this->saveField('tax_name', $t['Tax']['name']);
+			}
+
+		}
+	}
 
 }

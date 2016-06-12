@@ -39,7 +39,7 @@ class UsersController extends AppController {
  */
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow(array('logout'));
+		$this->Auth->allow(array('logout', 'session'));
 	}
 
 /**
@@ -61,26 +61,28 @@ class UsersController extends AppController {
 				}
 				$this->User->id = $this->Session->read('Auth.User.id');
 				$this->User->saveField('lastactive', date('Y-m-d H:i:s'));
-				$this->Cookie->write('session', $this->User->encrypt($this->request->data['User']));
+				$this->Cookie->write('session', $this->User->encrypt($this->User->id));
 				return $this->redirect($this->Auth->redirectUrl());
 			} else {
 				$this->Flash->loginError(__('Incorrect Username and/or Password.'));
 				$this->redirect(array('controller' => 'users', 'action' => 'login'));
 			}
 		} else {
-			$cookie = $this->Cookie->read('session');
-			pr($cookie);
-			if (isset($cookie) && !empty($cookie)) {
-				$this->request->data = $this->User->decrypt($this->Cookie->read('session'));
-				if ($this->Auth->login()) {
-					$this->User->id = $this->Session->read('Auth.User.id');
-					$this->User->saveField('lastactive', date('Y-m-d H:i:s'));
-					$this->Cookie->write('session', $this->User->encrypt($this->request->data['User']));
-					return $this->redirect($this->Auth->redirectUrl());
-				} else {
-					$this->Session->destroy('Auth.User');
-					$this->Cookie->destroy('session');
-					$this->redirect($this->Auth->logout());
+			$_session = $this->Session->read('Auth.User.id');
+	    	if (empty($_session)) { 
+				$_cookie = $this->Cookie->read('session');
+				if (isset($_cookie) && !empty($_cookie)) {
+					$user = $this->User->identify($this->User->decrypt($_cookie));
+					if ($this->Auth->login($user['User'])) {
+						$this->User->id = $this->Session->read('Auth.User.id');
+						$this->User->saveField('lastactive', date('Y-m-d H:i:s'));
+						$this->Cookie->write('session', $this->User->encrypt($this->User->decrypt($_cookie)));
+						return $this->redirect($this->Auth->redirectUrl());
+					} else {
+						$this->Session->destroy('Auth.User');
+						$this->Cookie->destroy('session');
+						$this->redirect($this->Auth->logout());
+					}
 				}
 			}
 		}
@@ -101,7 +103,10 @@ class UsersController extends AppController {
 		$this->redirect($this->Auth->logout());
 	}
 
-
+	public function session(){
+		$this->autoRender = false;
+		$this->Session->destroy('Auth.User');
+	}
 /**
  * Dashboard method
  *

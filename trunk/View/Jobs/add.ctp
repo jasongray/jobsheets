@@ -103,7 +103,7 @@ $(document).ready(function() {
         onSelect: function(item) {
             $('#JobCustomerId').val(item.value);
         },
-        displayField: 'customer',
+        displayField: 'text',
         ajax: {
             url: '".$this->Html->url(array('controller' => 'customers', 'action' => 'get'))."',
             method: 'POST',

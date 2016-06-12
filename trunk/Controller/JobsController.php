@@ -98,7 +98,7 @@ class JobsController extends AppController {
 		$this->Job->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
 		
 		$role = $this->Session->read('Auth.User.role_id');
-		$template = $this->Session->read('Auth.Client.template');
+		$template = $this->Session->read('Auth.User.Client.template');
 
 		switch ($role) {
 			case 1:
