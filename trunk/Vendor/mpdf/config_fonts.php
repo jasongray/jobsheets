@@ -122,6 +122,9 @@ $this->fontdata = array(
 		'I' => "DejaVuSansMono-Oblique.ttf",
 		'BI' => "DejaVuSansMono-BoldOblique.ttf",
 		),
+	'fontawesome' => array(
+		'R' => 'fontawesome-webfont.ttf',
+		),
 
 
 /* OCR-B font for Barcodes */

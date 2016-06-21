@@ -56,6 +56,7 @@
     			<div id="page-heading">
     				<?php echo $this->Module->load('breadcrumbs');?>
     				<?php echo $this->Html->tag('h1', h($this->fetch('title')));?>
+                    <?php echo $this->fetch('heading');?>
     			</div>
 
     			<div class="container">

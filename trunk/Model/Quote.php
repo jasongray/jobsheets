@@ -87,7 +87,7 @@ class Quote extends AppModel {
 /**
  * Validation Rules
  *
- * @var void
+ * @return void
  */
 	public function validate_create_location() {
 		$this->validate = array(
@@ -164,7 +164,7 @@ class Quote extends AppModel {
 /**
  * Check customer id exists when adding job
  *
- * @var $check Integar 
+ * @param $check Integar 
  * @return bool
  */
 	public function customerExists($check) {
@@ -189,7 +189,7 @@ class Quote extends AppModel {
 /**
  * Check postcode id exists when adding job
  *
- * @var $check Integar 
+ * @param $check Integar 
  * @return bool
  */
 	public function postcodeExists($check) {
@@ -211,7 +211,7 @@ class Quote extends AppModel {
 /**
  * Update tax rate into Quote table
  *
- * @var $data Array 
+ * @param $data Array 
  * @return void
  */
 	public function updateTax($data = array()) {
@@ -226,6 +226,48 @@ class Quote extends AppModel {
 			}
 
 		}
+	}
+
+/**
+ * Convert a quote to an invoice
+ *
+ * @param $id integer The quote ID
+ * @return bool
+ */
+	public function convertInvoice($quote_id = null) {
+		if ($quote_id) {
+			$this->id = $quote_id;
+			if ($this->exists()) {
+				// read quote information
+				$this->recursive = -1;
+				$q = $this->read(null, $this->id);
+				unset($q['Quote']['id']); 
+				unset($q['Quote']['created']); 
+				unset($q['Quote']['modified']); 
+				$data['Job'] = array_merge(
+					$q['Quote'],
+					array('reference' => __('From quote #'.$this->id))
+				);
+				App::uses('Job', 'Model');
+				$this->Job = new Job();
+				$this->Job->create();
+				if ($this->Job->save($data)) {
+					// read quote items to place them into the job items
+					$qi = $this->QuoteItem->find('all', array('conditions' => array('quote_id' => $this->id)));
+					$ji = array();
+					if ($qi) {
+						foreach ($qi as $_qi) {
+							$ji[] = array('job_id' => $this->Job->id, 'description' => $_qi['QuoteItem']['description'], 'amount' => $_qi['QuoteItem']['amount'], 'status' => 1);
+						}
+						if (!empty($ji)) {
+							$this->Job->JobItem->saveAll($ji);
+						}
+					}
+					return $this->Job->id;
+				}
+			}
+		}
+		return false;
 	}
 
 }

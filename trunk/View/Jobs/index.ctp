@@ -8,7 +8,19 @@
 		<div class="panel panel-midnightblue">
 			<div class="panel-heading">
 				<h4><i class="fa fa-reorder"></i> <?php echo __('Current Jobs', true);?></h4>
-				
+				<div class="options">
+					<ul class="nav nav-tabs">
+						<li<?php if($class_status == 'default'){ echo ' class="active"';}?>>
+							<?php echo $this->Html->link(__('Outstanding'), array('controller' => 'jobs', 'action' => 'index'));?>
+						</li>
+						<li<?php if($class_status == 'completed'){ echo ' class="active"';}?>>
+							<?php echo $this->Html->link(__('Completed'), array('controller' => 'jobs', 'action' => 'index', 'status' => 'completed'));?>
+						</li>
+						<li<?php if($class_status == 'cancelled'){ echo ' class="active"';}?>>
+							<?php echo $this->Html->link(__('Cancelled'), array('controller' => 'jobs', 'action' => 'index', 'status' => 'cancelled'));?>
+						</li>
+					</ul>
+				</div>
 			</div>
 			<div class="panel-body">
 				<table cellpadding="0" cellspacing="0" class="table table-hover table-striped">

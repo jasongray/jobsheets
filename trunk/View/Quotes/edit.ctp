@@ -3,6 +3,14 @@
 <?php $this->Paginator->options(array('url' => $this->passedArgs)); ?>
 <?php $this->Html->addCrumb(__('Edit Quote'));?>
 <?php echo $this->Html->css(array('datatables', 'plugins/select2.min.css'), array('inline' => false));?>
+<?php echo $this->start('heading');?>
+<div class="options">
+    <div class="btn-toolbar">
+        <?php echo $this->Html->link('<i class="fa fa-file-pdf-o"></i> ' . __('Download PDF'), array('controller' => 'quotes', 'action' => 'export', $this->data['Quote']['id'], 'type' => 'pdf'), array('class' => 'btn btn-default', 'escape' => false));?>
+        <?php echo $this->Html->link('<i class="fa fa-envelope-o"></i> ' . __('Email Quote'), array('controller' => 'quotes', 'action' => 'send', $this->data['Quote']['id'], 'type' => 'pdf'), array('class' => 'btn btn-inverse btn-emailquote', 'escape' => false));?>
+    </div>
+</div>
+<?php echo $this->end();?>
 <div class="row">
 	<div class="col-md-12">
 		<div class="panel panel-green">
@@ -22,10 +30,10 @@
 					<div class="col-md-12 col-lg-6">
 						<?php echo $this->Form->input('customer', array('class' => 'form-control select2-customer', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Select Customer')), 'between' => '<div class="col-md-8"><div class="input-group">', 'after' => '<div class="input-group-btn"><span class="input-group-btn">'.$this->Html->link('<i class="fa fa-plus"></i>', array('controller' => 'customers', 'action' => 'add'), array('class' => 'btn btn-info add-customer', 'title' => __('Add New Customer'), 'escape' => false)).'</span></div></div></div>', 'div' => 'form-group', 'data-provide' => 'typeahead', 'data-url' => $this->Html->url(array('controller' => 'customers', 'action' => 'get')), 'autocomplete' => 'off', 'type' => 'select', 'empty' => ''));?>
                         <?php echo $this->Form->hidden('customer_id');?>
-                        <?php echo $this->Form->input('name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Name')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
-                        <?php echo $this->Form->input('address', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Address')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
-                		<?php echo $this->Form->input('phone', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Phone')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
-                		<?php echo $this->Form->input('email', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Email')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <?php echo $this->Form->input('contact_name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Name')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <?php echo $this->Form->input('contact_address', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Address')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
+                		<?php echo $this->Form->input('contact_phone', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Phone')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
+                		<?php echo $this->Form->input('contact_email', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Email')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
                 	</div>
                 	<div class="col-md-12 col-lg-5 col-lg-offset-1">
                 		<?php $_date = (empty($this->data['Quote']['date']))? date('Y-m-d'): $this->data['Quote']['date'];?>
@@ -69,7 +77,7 @@
                     <div class="col-xs-12 col-md-2">
                         <?php echo $this->Form->input('QuoteItem.'.$j['id'].'.amount', array('class' => 'form-control', 'label' => array('class' => 'col-sm-12 col-md-12 col-lg-3 control-label', 'text' => __('Amount')), 'between' => '<div class="col-md-10 col-lg-6">', 'after' => '</div>', 'div' => 'form-group', 'data-inputmask' => "'mask':'$ 999,999.99', 'greedy' : false, 'rightAlignNumerics' : false", 'type' => 'text', 'value' => $j['amount']));?>
                     </div>
-                    <?php echo $this->Html->link('<i class="fa fa-trash"></i>', array('controller' => 'job_items', 'action' => 'delete', $j['id']), array('class' => 'quoteitem-delete', 'data-quoteitem' => 'quoteitem-'.$j['id'], 'escape' => false));?>
+                    <?php echo $this->Html->link('<i class="fa fa-trash"></i>', array('controller' => 'quote_items', 'action' => 'delete', $j['id']), array('class' => 'quoteitem-delete', 'data-quoteitem' => 'quoteitem-'.$j['id'], 'escape' => false));?>
                     <?php echo $this->Form->hidden('QuoteItem.'.$j['id'].'.id', array('value' => $j['id']));?>
                     <?php echo $this->Form->hidden('QuoteItem.'.$j['id'].'.quote_id', array('value' => $j['quote_id']));?>
                 </div>
@@ -160,6 +168,27 @@
     </div>
   </div>
 </div>
+<div id="emailQuote" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><?php echo __('Email Quote');?></h4>
+      </div>
+      <div class="modal-body">
+        <div class="form-horizontal">
+            <?php echo $this->Form->input('emailto', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Send To')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
+            <?php echo $this->Form->input('subject', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Send To')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group'));?>
+            <?php echo $this->Form->input('message', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Message')), 'between' => '<div class="col-md-10 col-lg-8">', 'after' => '</div>', 'div' => 'form-group', 'type' => 'textarea'));?>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <?php echo $this->Form->button(__('Send'), array('class' => 'btn btn-primary pull-left', 'id' => 'sendQuote'));?>
+        <?php echo $this->Form->button(__('Close'), array('class' => 'btn btn-default pull-right', 'data-dismiss' => 'modal'));?>
+      </div>
+    </div>
+  </div>
+</div>
 <?php echo $this->Html->script(array(
 'plugins/bootstrap-datepicker/bootstrap-datepicker', 
 'plugins/bootstrap-typeahead/bootstrap-typeahead.min', 
@@ -191,6 +220,26 @@ var quoteitems = function () {
                 alert('error');
             }
         });
+    });
+}
+var emailquote = function() {
+    $('.btn-emailquote').click(function(e){
+        e.preventDefault();
+        // clear form values
+        $('#message').val('');$('#emailto').val(''); $('#subject').val('".__('Quote from') . ' ' . $this->Session->read('Auth.User.Client.name')."');
+        // fill basics
+        $('#emailto').val($('#QuoteContactEmail').val());
+        $('#emailQuote').modal();
+    });
+    $('#sendQuote').click(function(e){
+        e.preventDefault();
+        $.post($('.btn-emailquote').attr('href'), { 'emailto': $('#emailto').val(), 'message': $('#message').val(), 'subject': $('#subject').val()}, function(d){
+            if (d.success) {
+                $('#emailQuote').modal('hide');
+            } else {
+                alert(d.message);
+            }
+        }, 'json');
     });
 }
 $(document).ready(function() {
@@ -297,7 +346,7 @@ $(document).ready(function() {
         $('#addQuoteItem').modal();
     });
     quoteitems();
-
+    emailquote();
     $('.select2').select2();
 
 });", array('inline' => false));?>

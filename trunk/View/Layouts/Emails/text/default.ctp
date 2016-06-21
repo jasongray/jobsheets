@@ -16,4 +16,4 @@
 ?>
 <?php echo $this->fetch('content'); ?>
 
-This email was sent using the CakePHP Framework, http://cakephp.org.
+This email was sent using JobSheets. http://jobsheets.com.au

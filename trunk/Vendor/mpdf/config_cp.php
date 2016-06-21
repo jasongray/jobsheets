@@ -29,8 +29,8 @@ function GetLangOpts($llcc, $adobeCJK) {
 	  CASE "sv":
 		// Edit this value to define how mPDF behaves when using new mPDF('-x')
 		// If set to TRUE, mPDF will use Adobe core fonts only when it recognises the languages above
-		$coreSuitable = true;  break;
-
+		$coreSuitable = true;  
+		$unifonts = 'fontawesome'; break;
 
 
 	  // RTL Languages

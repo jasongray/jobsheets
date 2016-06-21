@@ -1,5 +1,5 @@
 <div class="row">
-	<div class="col-md-6">
+	<div class="col-md-6 hidden-xs">
 		<?php echo $this->Paginator->counter(array('format' => __('Showing {:start} of {:end} of {:count} entries', true)));?>
 	</div>
 	<div class="col-md-6">

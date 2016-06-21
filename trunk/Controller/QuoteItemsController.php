@@ -75,7 +75,7 @@ class QuoteItemsController extends AppController {
 		$this->QuoteItem->id = $id;
 		$data = $this->QuoteItem->read(null, $id);
 		if ($this->QuoteItem->delete()) {
-			$this->QuoteItem->updateTotal($this->request->data['QuoteItem']['quote_id']);
+			$this->QuoteItem->updateTotal($data['QuoteItem']['quote_id']);
 			$this->joblog($data['QuoteItem']['quote_id'], __('Quote Item deleted by user %s', $this->Session->read('Auth.User.id')), json_encode($data));
 			$return = json_encode(array('success' => __('Success')));
 		}

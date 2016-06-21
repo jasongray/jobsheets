@@ -8,16 +8,28 @@
 		<div class="panel panel-midnightblue">
 			<div class="panel-heading">
 				<h4><i class="fa fa-reorder"></i> <?php echo __('Current Jobs', true);?></h4>
-				
+				<div class="options">
+					<ul class="nav nav-tabs">
+						<li<?php if($class_status == 'default'){ echo ' class="active"';}?>>
+							<?php echo $this->Html->link(__('Outstanding'), array('controller' => 'jobs', 'action' => 'index'));?>
+						</li>
+						<li<?php if($class_status == 'completed'){ echo ' class="active"';}?>>
+							<?php echo $this->Html->link(__('Completed'), array('controller' => 'jobs', 'action' => 'index', 'status' => 'completed'));?>
+						</li>
+						<li<?php if($class_status == 'cancelled'){ echo ' class="active"';}?>>
+							<?php echo $this->Html->link(__('Cancelled'), array('controller' => 'jobs', 'action' => 'index', 'status' => 'cancelled'));?>
+						</li>
+					</ul>
+				</div>
 			</div>
 			<div class="panel-body">
 				<table cellpadding="0" cellspacing="0" class="table table-hover table-striped">
 					<thead>
 					<tr>
 						<th class="icon"><?php echo __('Id');?></th>
-						<th><?php echo $this->Paginator->sort('reference', __('Reference'));?></th>
+						<th class="hidden-xs"><?php echo $this->Paginator->sort('reference', __('Reference'));?></th>
 						<th><?php echo $this->Paginator->sort('status', __('Status'));?></th>
-						<th class="actions"><?php echo __('Actions');?></th>
+						<th class="actions hidden-xs"><?php echo __('Actions');?></th>
 					</tr>
 					</thead>
 					<tbody>
@@ -29,13 +41,13 @@
 		                        <span class="badge badge-danger"><?php echo __('Overdue');?></span>
 		                    <?php } ?>
 						</td>
-						<td>
+						<td class="hidden-xs">
 							<?php echo $this->Html->link($j['Job']['reference'], array('action' => 'view', $j['Job']['id']), array('class'=>'edit-link'));?>
 						</td>
 						<td>
 							<?php echo $this->Html->jobStatus($j['Job']['status']); ?>
 						</td>
-						<td class="actions">
+						<td class="actions hidden-xs">
 							<?php echo $this->Html->link('<i class="fa fa-search"></i>', array('action' => 'view', $j['Job']['id']), array('escape' => false, 'class' => 'bs-tooltip', 'title' => 'View', 'data-toggle' => 'tooltip')); ?>
 						</td>
 					</tr>

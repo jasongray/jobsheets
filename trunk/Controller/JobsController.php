@@ -99,6 +99,18 @@ class JobsController extends AppController {
 		
 		$role = $this->Session->read('Auth.User.role_id');
 		$template = $this->Session->read('Auth.User.Client.template');
+		if (isset($this->request->params['named']['status'])) {
+			if ($this->request->params['named']['status'] == 'completed') {
+				$JobStatus = array('Job.status' => 8);
+			}
+			if ($this->request->params['named']['status'] == 'cancelled') {
+				$JobStatus = array('Job.status' => 9);
+			}
+			$class_status = $this->request->params['named']['status'];
+		} else {
+			$JobStatus = $JobStatus = array('Job.status <' => 8);
+			$class_status = 'default';
+		}
 
 		switch ($role) {
 			case 1:
@@ -108,9 +120,10 @@ class JobsController extends AppController {
 			case 2:
 			case 3:
 				$this->paginate = array(
-					'conditions' => array(
+					'conditions' => array_merge(array(
 						'Job.client_id' => $this->Session->read('Auth.User.client_id'),
 						'Job.client_meta' => $this->Session->read('Auth.User.client_meta'),
+						), $JobStatus
 					),
 					'limit' => 25, 
 					'order' => array('Job.created ASC, Job.status ASC'),
@@ -120,10 +133,11 @@ class JobsController extends AppController {
 			case 4:
 			default:
 				$this->paginate = array(
-					'conditions' => array(
+					'conditions' => array_merge(array(
 						'Job.user_id' => $this->Session->read('Auth.User.id'),
 						'Job.client_id' => $this->Session->read('Auth.User.client_id'),
 						'Job.client_meta' => $this->Session->read('Auth.User.client_meta'),
+						), $JobStatus
 					),
 					'limit' => 25, 
 					'order' => array('Job.status ASC, Job.created ASC'),
@@ -133,7 +147,7 @@ class JobsController extends AppController {
 		}
 
 		$this->set('data', $this->paginate());
-
+		$this->set(compact('class_status'));
 		$this->render($template);
 	}
 

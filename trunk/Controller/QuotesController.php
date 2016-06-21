@@ -19,6 +19,7 @@
  */
 
 App::uses('AppController', 'Controller');
+App::uses('CakeEmail', 'Network/Email');
 
 /**
  * Quotes controller
@@ -301,6 +302,121 @@ class QuotesController extends AppController {
 			$this->redirect(array('action' => 'edit', $id));
 		}
 
+	}
+
+/** 
+ * Convert quote into job
+ *
+ * @param int $id Quote id
+ * @return void
+ */
+	public function convert($id) {
+		$this->Quote->id = $id;
+		if (!$this->Quote->exists()) {
+			throw new NotFoundException(__('Invalid job id'));
+		}
+		if ($job_id = $this->Quote->convertInvoice($id)) {
+			$this->joblog($id, __('Quote %s converted to job by user %s', $id, $this->Session->read('Auth.User.id')));
+			$this->Flash->success(__('Quote converted to job'));
+			$this->redirect(array('controller' => 'jobs', 'action' => 'edit', $job_id));
+		}
+
+	}
+
+
+/** 
+ * Export quote
+ *
+ * @param int $id Quote id
+ * @return void
+ */
+	public function export($id) {
+		$this->Quote->id = $id;
+		if (!$this->Quote->exists()) {
+			throw new NotFoundException(__('Invalid job id'));
+		}
+		$quote = $this->Quote->read(null, $id);
+		$this->set(compact('quote'));
+		if (isset($this->request->params['named']['type'])) {
+			$this->set('title_for_layout', 'Quote #'.$id.' from '.$quote['Client']['name']);
+			if ($this->request->params['named']['type'] == 'pdf'){
+				$this->generatePDF($quote, 'D');
+			}
+		} else {
+			$this->render(false);
+		}
+	}
+
+
+/** 
+ * Send quote via email
+ *
+ * @param int $id Quote id
+ * @return void
+ */
+	public function send($id) {
+		$this->Quote->id = $id;
+		if (!$this->Quote->exists()) {
+			throw new NotFoundException(__('Invalid job id'));
+		}
+		$quote = $this->Quote->read(null, $id);
+		$this->set(compact('quote'));
+		if ($this->request->is('post') && $this->request->is('ajax')) {
+			$this->autoRender = false;
+			$message = $this->request->data['message'];
+			$client = $this->Session->read('Auth.User');
+			$attachment = ROOT . DS . APP_DIR . DS . 'tmp' . DS . 'Quote-'.$quote['Quote']['id'].'.pdf';
+			$this->generatePDF($quote, 'F');
+			$email = new CakeEmail('smtp');
+			$email->template('send_quote', 'default');
+			$email->domain('jobsheets.com.au');
+			$email->emailFormat('both');
+			$email->from($this->Session->read('Auth.User.Client.email'));
+			$email->sender($this->Session->read('Auth.User.Client.email'));
+			$email->to($this->request->data['emailto']);
+			$email->subject($this->request->data['subject']);
+			$email->attachments($attachment);
+			$email->viewVars(compact('message', 'client', 'quote'));
+			if ($email->send()) {
+				unlink($attachment);
+				$this->response = null;
+				echo json_encode(array('success' => 'Success'));
+			} else {
+				echo json_encode(array('error' => 'Error', 'message' => __('Error sending email')));
+			}
+		}
+
+
+	}
+
+/**
+ * Generate PDF of quote
+ *
+ * @param array $quote Quote data array
+ * @param string $output either D = force download, F = save a local file, S = document as string, I = inline to browser.
+ * @return string $filename
+ */
+	private function generatePDF($quote = array(), $output = 'D') {
+		if (!empty($quote)) {
+			if ($output == 'F') {
+				$filename = ROOT . DS . APP_DIR . DS . 'tmp' . DS . 'Quote-'.$quote['Quote']['id'].'.pdf';
+			} else {
+				$filename = 'Quote-'.$quote['Quote']['id'].'.pdf';
+			}
+			$this->layout = 'pdf';
+			$this->PDF = $this->Components->load('Mpdf');
+			$this->PDF->init(array('font' => 'en', 'font_size' => 10, 'margin_top' => 5, 'margin_right' => 5, 'margin_bottom' => 5, 'margin_left' => 5));
+			$this->PDF->SetDisplayMode('fullpage');
+			$this->PDF->SetAuthor(__('JobSheets') . ' ' . date('Y'));
+			$this->PDF->setFileName($filename);
+			$this->PDF->setOutput($output);
+			if ($quote['Quote']['status'] == 0) {
+				$this->PDF->SetWatermarkText(__('DRAFT'));
+				$this->PDF->showWatermarkText = true;
+				$this->PDF->watermarkTextAlpha = 0.1;
+			}
+			$this->render('pdf');
+		} 
 	}
 
 }
