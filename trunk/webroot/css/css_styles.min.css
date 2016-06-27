@@ -1795,6 +1795,13 @@ textarea.form-control {
 input[type="search"] {
   -webkit-appearance: none;
 }
+.register .select2.select2-container {
+  padding-left: 9px;
+}
+.register .select2.select2-container .select2-selection__rendered {
+  padding-left: 0;
+  line-height: 18px;
+}
 @media screen and (-webkit-min-device-pixel-ratio: 0) {
   input[type="date"],
   input[type="time"],
@@ -11122,6 +11129,11 @@ a.shortcut-tiles {
 .panel-tasks li .icon-dragtask:focus {
   cursor: -webkit-grabbing;
   cursor: -moz-grabbing;
+}
+.panel-tasks li .time {
+    color: #aeafb1;
+    float: right;
+    font-size: 12px;
 }
 .panel-chat {
   margin-bottom: 20px;

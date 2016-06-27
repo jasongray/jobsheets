@@ -20,6 +20,9 @@
 	</div>
 </div>
 <div class="panel-footer">
+	<div class="pull-left">
+		<?php echo $this->Html->link(__('Register'), array('controller' => 'users', 'action' => 'register'), array('class' => 'btn btn-default', 'escape' => false));?>
+	</div>
 	<div class="pull-right">
     	<?php echo $this->Form->button(__('Log In'), array('class' => 'btn btn-primary', 'escape' => false));?>
     </div>

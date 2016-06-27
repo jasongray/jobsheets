@@ -14,16 +14,17 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 ?>
-<h2><?php echo $message; ?></h2>
-<p class="error">
-	<strong><?php echo __d('cake', 'Error'); ?>: </strong>
-	<?php printf(
-		__d('cake', 'The requested address %s was not found on this server.'),
-		"<strong>'{$url}'</strong>"
-	); ?>
-</p>
-<?php
-if (Configure::read('debug') > 0):
-	echo $this->element('exception_stack_trace');
-endif;
-?>
+				<div class="col-md-12">
+					<p class="text-center">
+						<span class="text-info" style="font-size:4em;"><?php echo __('Uh-oh');?></span>
+					</p>
+					<p class="text-center"><?php echo __('It looks like you have taken a wrong turn');?></p>
+					<p class="text-center"><?php echo $message; ?></p>
+				</div>
+				<div class="col-md-4 col-md-offset-4">
+					<?php
+					if (Configure::read('debug') > 0):
+						echo $this->element('exception_stack_trace');
+					endif;
+					?>
+				</div>

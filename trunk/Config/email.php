@@ -45,7 +45,7 @@ class EmailConfig {
 
 	public $smtp = array(
 		'transport' => 'Smtp',
-		'from' => array('quotes@jobsheets.com.au' => 'JobSheets Quote'),
+		'from' => array('noreply@jobsheets.com.au' => 'JobSheets'),
 		'host' => 'ssl://scph03.ecloud-services.com',
 		'port' => 465,
 		'timeout' => 30,

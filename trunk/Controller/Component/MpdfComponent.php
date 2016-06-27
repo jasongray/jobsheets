@@ -57,7 +57,7 @@ class MpdfComponent extends Component {
         error_reporting(0);
 
         // import mPDF
-        App::import('Vendor', 'mPDF', array('file' => 'mpdf/mpdf.php'));
+        App::import('Vendor', 'mPDF', array('file' => 'mPDF/mpdf.php'));
         if (!class_exists('mPDF'))
             throw new CakeException('Vendor class mPDF not found!');
 

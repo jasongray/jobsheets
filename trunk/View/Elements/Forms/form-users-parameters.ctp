@@ -17,7 +17,7 @@
 <div class="form-group">
 	<label class="col-md-2 control-label"><?php echo __('Last Login');?></label>
 	<div class="col-md-10">
-		<?php if (!empty($this->data['User']['last_login'])){ echo $this->Time->timeAgoInWords($this->data['User']['last_login'], array('end' => '+1 year')); } else { echo __('Never'); } ?>
+		<?php if (!empty($this->data['User']['lastactive'])){ echo $this->Time->timeAgoInWords($this->data['User']['lastactive'], array('end' => '+1 year')); } else { echo __('Never'); } ?>
 	</div>
 </div>
 <?php echo $this->Form->input('client_id', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Client'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'empty' => '')); ?>

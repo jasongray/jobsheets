@@ -112,6 +112,7 @@ class QuotesController extends AppController {
 		}
 		$this->data = $this->Quote->find('first', array('conditions' => array('Quote.client_id' => $this->Session->read('Auth.User.client_id'), 'Quote.client_meta' => $this->Session->read('Auth.User.client_meta'), 'Quote.id' => $id)));
 		$this->Quote->QuoteItem->updateTotal($id);
+		$this->set('title_for_layout', __('View Quote').sprintf(' %s', $this->data['Quote']['id']));
 	}
 
 /**
@@ -163,6 +164,7 @@ class QuotesController extends AppController {
 		$this->set('customers', $this->Quote->Customer->find('list', array('conditions' => array('Customer.client_id' => $this->Session->read('Auth.User.client_id')))));
 		$this->loadModel('Tax');
 		$this->set('taxes', $this->Tax->find('list'));
+		$this->set('title_for_layout', __('New Quote'));
 	}
 
 /** 
@@ -237,6 +239,7 @@ class QuotesController extends AppController {
 		$this->set('users', $this->Quote->User->find('list', array('fields' => array('id', 'fullname'), 'conditions' => array('User.client_id' => $this->Session->read('Auth.User.client_id')))));
 		$this->loadModel('Tax');
 		$this->set('taxes', $this->Tax->find('list'));
+		$this->set('title_for_layout', __('Edit Quote').sprintf(' %s', $this->data['Quote']['id']));
 	}
 
 /**

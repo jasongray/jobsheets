@@ -65,6 +65,37 @@ class User extends AppModel {
 		),
 	);
 
+/**
+ * Validation Rules
+ *
+ * @var void
+ */
+	public function validate_signup() {
+		$this->validate = array(
+			'email' => array(
+				'rule' => 'email',
+				'message' => __('Please enter a valid email address'),
+				'required' => true,
+			),
+			'business' => array(
+				'rule' => 'notBlank',
+				'message' => __('Please enter your business name'),
+				'required' => true,
+			),
+			'phone' => array(
+				'rule' => array('phone', '/^0[0-8]\d{8}$/', 'au'),
+				'message' => __('Please enter a valid phone number'),
+				'required' => true,
+			),
+			'locale' => array(
+				'rule' => 'notBlank',
+				'message' => __('Please select your country'),
+				'required' => true,
+			),
+		);
+	}
+
+
 	var $actsAs = array('Acl' => array('type' => 'requester'));
 	
 	function parentNode() {
@@ -90,8 +121,61 @@ class User extends AppModel {
 	    } else {
 			unset($this->data['User']['password']);
 		}
+
 	    return true;
 
+	}
+
+	public function create_account() {
+		// set some user defaults
+		$this->data['User']['role_id'] = 2; // basic admin role for general clients
+		$this->data['User']['status'] = 0; // un verified status
+
+		// generate SMS code
+		$this->data['User']['smscode'] = $this->randomnumbers(6);
+
+		// generate password
+		$this->data['User']['password'] = $this->generatePassword(false, 7, 6);
+
+		// set some client defaults
+		$this->data['Client']['name'] = $this->data['User']['business'];
+		$this->data['Client']['email'] = $this->data['User']['email'];
+		$this->data['Client']['status'] = 0; // un verified status		
+		$this->data['Client']['userlimit'] = 4; // trial user limit...		
+		$this->data['Client']['acc'] = 'trial'; // trial status period
+		$this->data['Client']['acc_days'] = 14; // trial days period
+
+		// save client data and return the id
+		if ($this->Client->save($this->data['Client'])) {
+			$client = $this->Client->read(null, $this->Client->id);
+			$this->data['User']['client_id'] = $client['Client']['id'];
+			$this->data['User']['client_meta'] = $client['Client']['client_meta'];
+			$_data = $this->data['User'];
+			if ($this->save($this->data['User'])) {
+				$_data = array_merge($_data, array('id' => $this->id));
+				CakeSession::write('huijnklmsa', base64_encode(json_encode($_data)));
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public function checkcode($data = array()) {
+		$user = json_decode(base64_decode(CakeSession::read('huijnklmsa')), true);
+		if ($this->find('first', array('conditions' => array('User.id' => $user['id'], 'User.smscode' => $data['User']['smscode'])))) {
+			$this->id = $user['id'];
+			$this->saveField('status', 1);
+			return true;
+		}
+		return false;
+	}
+
+	public function underlimit() {
+		$count = $this->find('count', array('conditions' => array('User.client_id' => CakeSession::read('Auth.User.client_id'))));
+		if(intval($count) > intval(CakeSession::read('Auth.Client.userlimit'))) {
+			return true;
+		}
+		return false;
 	}
 
 	public function decrypt($data = false, $login = false) {
@@ -110,15 +194,14 @@ class User extends AppModel {
 			if (!is_array($data)) {
 				$data = $this->read(null, $data);
 			}
-			$passwordHasher = new BlowfishPasswordHasher();
 			return base64_encode(Security::rijndael(sprintf($this->code, $this->key, $data['User']['email'], $data['User']['password']), $this->key, 'encrypt'));
 		}
 		return false;
 	}
 
-	 public function identify($user = array()) {
+	public function identify($user = array()) {
 	 	if (!empty($user)) {
-	 		$_user = $this->find('first', array('conditions' => array('email' => $user['User']['email'], 'password' => $user['User']['password'])));
+	 		$_user = $this->find('first', array('conditions' => array('User.email' => $user['User']['email'], 'User.password' => $user['User']['password'])));
 	 		if (!empty($_user)) {
 	 			unset($_user['User']['password']);
 	 			$_out['User'] = $_user['User'];
@@ -128,7 +211,60 @@ class User extends AppModel {
 	 		}
 	 	}
 	 	return false;
-	 }
+	}
+
+/**
+ * generate a set of random numbers
+ *
+ * @param integer $len The number of characters to generate
+ * @return string $out
+ */	
+	private function randomnumbers($len = 6) {
+	 	$out = '';
+	 	$chars = '0123456789';
+	 	for ($i=0; $i<$len; $i++) {
+	 		$out .= ($i%2) ? $chars[mt_rand(4,8)] : $chars[mt_rand(0,9)];
+	 	}
+	 	return $out;
+	}
+
+/**
+ * generatePassword method
+ * 
+ * Generates a random set of characters depending upon the parameters entered and saves to the user record.
+ *
+ * @param integer $uid The user id of the user to save the password
+ * @param integer $length The number of characters to generate
+ * @param integer $strength The strength of the password to generate. 1 being alpha only, 8 being alpha numeric with symbols.
+ * @return string $password
+ */		
+	private function generatePassword($uid = false, $length = 10, $strength = 8) {
+		
+		$chars = 'aeubcsfghjklmnpqrstvwxyz';
+		if ($strength & 1) {
+			$chars .= 'BCDFGHJKLMNPRSTVWXYZ';
+		}
+		if ($strength & 2) {
+			$chars .= "AEU";
+		}
+		if ($strength & 4) {
+			$chars .= '1234567890';
+		}
+		if ($strength & 8) {
+			$chars .= '@#$%!*_()^!?][{}|';
+		}
+		 
+		$password = '';
+		for ($i = 0; $i < $length; $i++) {
+			$password .= $chars[mt_rand(0, strlen($chars)-1)];
+		}
+		if ($uid) {
+			$this->id = $uid;
+			$this->saveField('password', $password);
+		}
+		return $password;
+		
+	}
 
 }
 ?>

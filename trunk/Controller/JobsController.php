@@ -63,21 +63,7 @@ class JobsController extends AppController {
 		 		# code...
 		 		break;
 		}
-
-		$data = $this->Job->find('all', array(
-			'conditions' => array(
-				'Job.allocated BETWEEN ? AND ?' => array($week['start'], $week['end']), 
-				'Job.status' => 1,
-				'Job.client_id' => $this->Session->read('Auth.User.client_id'),
-				'Job.client_meta' => $this->Session->read('Auth.User.client_meta'),
-			),
-			'order' => array(
-				'Job.allocated ASC'
-			),
-		));
-
-
-		$this->set(compact('data'));
+		$this->set('data', $this->Job->calendardata($week['start'], $week['end']));
 
 	}
 

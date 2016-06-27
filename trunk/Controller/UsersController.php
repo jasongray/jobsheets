@@ -21,7 +21,7 @@
 App::uses('AppController', 'Controller');
 App::uses('Folder', 'Utility');
 App::uses('File', 'Utility');
-
+App::uses('CakeEmail', 'Network/Email');
 /**
  * Users controller
  *
@@ -39,7 +39,71 @@ class UsersController extends AppController {
  */
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow(array('logout', 'session'));
+		$this->Auth->allow(array('register', 'verify', 'forgot', 'logout', 'session'));
+	}
+
+/**
+ * Register method
+ *
+ * Users can register for an account. They will receive a verification SMS using the Esendex API before the account is setup.
+ *
+ * @return void
+ */
+	public function register () {
+		$this->layout = 'login';
+		if ($this->request->is('post')) {
+			$this->User->set($this->request->data);
+			$this->User->validate_signup();
+			if ($this->User->validates()) {
+				if ($this->User->create_account()) {
+					$user = json_decode(base64_decode($this->Session->read('huijnklmsa')), true);
+					$this->SMS = $this->Components->load('SMS');
+					$this->SMS->init();
+					$this->SMS->send($user['phone'], __('Your JobSheets verification code is ') . $user['smscode']);
+					//$this->SMS->send('0423038000', __('New user registered'));
+					$this->redirect(array('controller' => 'users', 'action' => 'verify'));
+				}
+			} else {
+				$errors = $this->User->validationErrors;
+				$this->Flash->error(__('Please correct any errors and try again'));
+			}
+		}
+		$this->loadModel('Region');
+		$this->set('locales', $this->Region->find('list', array('fields' => array('alpha-2', 'name'))));
+		if (empty($this->data)) {
+			$this->data = array('User' => array('locale' => 'AU'));
+		}
+		$this->set('title_for_layout', __('Register to use JobSheets'));
+	}
+
+/**
+ * Verify sms code and send credentials to new client
+ *
+ * @return void
+ */
+	public function verify () {
+		$this->layout = 'login';
+		if ($this->request->is('post')) {
+			if ($this->User->checkcode($this->request->data)) {
+				$user = json_decode(base64_decode($this->Session->read('huijnklmsa')), true);
+				$email = new CakeEmail('smtp');
+				$email->template('welcome', 'default');
+				$email->domain('jobsheets.com.au');
+				$email->emailFormat('both');
+				$email->to($user['email']);
+				$email->subject(__('Welcome to JobSheets - Online job management software'));
+				$email->viewVars(compact('user'));
+				if ($email->send()) {
+					$this->Flash->loginSuccess(__('You will receive an email with your login details. Please check the email account you registered with us.'));
+					$this->Session->delete('huijnklmsa');
+					$this->redirect(array('controller' => 'users', 'action' => 'login'));
+				}
+			} else {
+				$this->Flash->loginWarning(__('Incorrect verification code. Please try again'));
+				$this->data = null;
+			}
+		}
+		$this->set('title_for_layout', __('Verify your account'));
 	}
 
 /**
@@ -86,7 +150,7 @@ class UsersController extends AppController {
 				}
 			}
 		}
-
+		$this->set('title_for_layout', __('Login to use JobSheets'));
 	}
 
 /**
@@ -116,8 +180,18 @@ class UsersController extends AppController {
  */
 	public function dashboard() {
 		
-		// TO DO - add stuff here!
-		
+		$invoice = array('total' => 0, 'lastweek' => 0);
+		$jobs = array('outstanding' => 0);
+		$quotes = array('count' => 0);
+
+		$this->loadModel('Job');
+		$calendar = $this->Job->calendardata();
+
+		$this->loadModel('Sysmsg');
+		$messages = $this->Sysmsg->find('all', array('conditions' => array('Sysmsg.status' => 1), 'order' => 'Sysmsg.created ASC'));
+
+		$this->set(compact('invoice', 'jobs', 'quotes', 'calendar', 'messages'));
+		$this->set('title_for_layout', __('My Dashboard'));
 	}
 
 /**
@@ -145,6 +219,29 @@ class UsersController extends AppController {
 		$this->set('data', $this->paginate());
 	}
 
+/**
+ * Profile user method
+ *
+ * @param string $id
+ * @return void
+ */
+	public function profile() {
+		$this->User->id = $this->Session->read('Auth.User.id');
+		if (!$this->User->isMine($this->User->id, $this->Session->read('Auth.User.client_meta'))) {
+			throw new NotFoundException(__('Invalid user'));
+		}
+		if ($this->request->is('post') || $this->request->is('put')) {
+			if ($this->User->saveAll($this->data)) {
+				$this->saveAvatar($this->User->id);
+				$this->saveLogo($this->request->data['Client']['id']);
+				$this->Flash->success(__('Your profile information has been updated.'));
+			} else {
+				$this->Flash->error(__('There was an error. Please, try again.'));
+			}
+		}
+		$this->data = $this->User->read(null, $this->User->id);
+		$this->set('title_for_layout', __('My Profile'));
+	}
 
 /**
  * View user method
@@ -168,6 +265,10 @@ class UsersController extends AppController {
  * @return void
  */
 	public function add() {
+		if (!$this->User->underlimit()) {
+			$this->Flash->error(__('You have reached your allowed user limit. To increase your user limit visit your account page and update your subscription.'));
+			$this->redirect(array('controller' => 'users', 'action' => 'index'));
+		}
 		if ($this->request->is('post')) {
 			$this->User->create();
 			if ($this->User->save($this->request->data)) {
@@ -186,6 +287,7 @@ class UsersController extends AppController {
 			$roles = $this->User->Role->find('list', array('conditions' => array('Role.id > ' => $role)));
 		}
 		$this->set(compact('roles'));
+		$this->set('title_for_layout', __('Create User'));
 	}
 
 /**
@@ -218,11 +320,12 @@ class UsersController extends AppController {
 				$this->set('clients', $this->User->Client->find('list'));
 				$roles = $this->User->Role->find('list');				
 			} else {
-				$roles = $this->User->Role->find('list', array('conditions' => array('Role.id > ' => $role)));
+				$roles = $this->User->Role->find('list', array('conditions' => array('Role.id >= ' => $role)));
 				$this->set('clients', $this->User->Client->find('list', array('conditions' => array('Client.id' => $this->Session->read('Auth.User.client_id')))));
 			}
 			$this->set(compact('roles'));
 		}
+		$this->set('title_for_layout', __('Edit User').sprintf(' %s', $id));
 	}
 
 /**
@@ -298,6 +401,62 @@ class UsersController extends AppController {
 			}
 		}
 		//$this->redirect(array('action' => 'edit', $id));
+	}
+
+// Client logo methods
+
+/**
+ * save client logo
+ *
+ * @param string $id
+ * @return void
+ */	
+	private function saveLogo($id = false) {
+		if(isset($this->request->data['Image']['logo']) && $this->request->data['Image']['logo']['error'] != 4){
+			$this->User->Client->id = $id;
+			$c = strtolower(substr($this->User->Client->field('Client.name'), 0, 2));
+			$temp = $this->data['Image']['logo']['tmp_name'];
+			$tdir = WWW_ROOT . 'img' . DS . 'logo';
+			$dir = new Folder($tdir, true, 0766);
+			$tdir = $tdir . DS . $c;
+			$dir = new Folder($tdir, true, 0766);
+
+			$file = pathinfo($this->request->data['Image']['logo']['name']);
+			$target = time() . md5($this->data['Image']['logo']['name']) . '.' . $file['extension'];
+			
+			if(move_uploaded_file($temp, $tdir . DS . $target)){
+				$this->User->Client->saveField('logo', $c . DS . $target);
+			} else {
+				$this->Flash->warning(__('Logo was not uploaded', true));
+			}
+			
+		}
+	}
+
+/**
+ * removeAvatar method
+ *
+ * @param string $id
+ * @return void
+ */
+	public function removeLogo($id = false) {
+		if (!$this->User->isMine($id, $this->Session->read('Auth.User.client_meta'))) {
+			throw new NotFoundException(__('Invalid user'));
+		}
+		$this->layout = 'ajax';
+		$this->render(false);
+		$this->Flash->warning('Logo was not removed', true);
+		if ($id) {
+			$this->User->Client->id = $id;
+			$logo = $this->User->Client->field('Client.logo');
+			if ($file = new File(WWW_ROOT . 'img' . DS . 'logo' . DS . $logo)) {
+				$file->delete();
+			}
+			if ($this->User->Client->saveField('logo', '')) {
+				$this->Flash->success('Logo was removed', true);
+			}
+		}
+		$this->redirect(array('action' => 'profile'));
 	}
 
 }

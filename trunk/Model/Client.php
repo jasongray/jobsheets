@@ -55,7 +55,7 @@ class Client extends AppModel {
 	);
 
 	public function beforeSave($options = array()) {
-		if (!isset($this->data['Client']['client_meta'])) {
+		if (!isset($this->data['Client']['client_meta']) && !empty($this->data['Client']['name'])) {
 			$this->data['Client']['client_meta'] = base64_encode(time().$this->data['Client']['name']);
 		}
 	    return true;

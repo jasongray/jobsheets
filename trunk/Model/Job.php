@@ -234,4 +234,32 @@ class Job extends AppModel {
 		return false;
 	}
 
+/**
+ * Jobs in nice pretty calendar format
+ *
+ * @var $start Start datetime string
+ * @var $end End satetime string
+ * @return array
+ */
+	public function calendardata($start = null, $end = null) {
+		if (!$start) {
+			$start = date('Y-m-d', strtotime('previous sunday'));
+		}
+		if (!$end) {
+			$end = date('Y-m-d', strtotime('next saturday'));
+		}
+		return $this->find('all', array(
+			'conditions' => array(
+				'Job.allocated BETWEEN ? AND ?' => array($start, $end), 
+				'Job.status' => 1,
+				'Job.client_id' => CakeSession::read('Auth.User.client_id'),
+				'Job.client_meta' => CakeSession::read('Auth.User.client_meta'),
+			),
+			'order' => array(
+				'Job.allocated ASC'
+			),
+		));
+
+	}
+
 }

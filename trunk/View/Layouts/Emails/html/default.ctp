@@ -21,7 +21,5 @@
 </head>
 <body>
 	<?php echo $this->fetch('content'); ?>
-
-	<p>This email was sent using <a href="http://jobsheets.com.au">JobSheets</a></p>
 </body>
 </html>

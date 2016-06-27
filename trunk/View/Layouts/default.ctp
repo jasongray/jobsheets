@@ -27,7 +27,7 @@
 	<?php echo $this->Html->css(array(
     'http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.css',
-    'css_styles.min'));?>
+    'css_styles.min',));?>
 	<?php echo $this->fetch('css');?>
 </head>
 <body>
@@ -88,8 +88,6 @@
 	<?php 
 		echo $this->fetch('script');
 		echo $this->element('sql_dump'); 
-        //pr($this->Session->read('Auth.User'));
-        //pr($__cookie);
 	?>
 </body>
 </html>

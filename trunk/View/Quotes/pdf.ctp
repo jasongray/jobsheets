@@ -16,7 +16,7 @@
 								<tr> 
 									<td style="color:#232c3b;font-size:18px;">
 										<?php if(!empty($quote['Client']['logo'])) { ?>
-										<h2><?php echo $this->Html->image('logo/'.$quote['Client']['logo'], array('alt' => $quote['Client']['name'], 'style' => 'max-height:100px;', 'fullBase' => true));?></h2>
+										<h2><?php echo $this->Html->image('logo/'.$quote['Client']['logo'], array('alt' => $quote['Client']['name'], 'style' => 'max-height:100px;max-width:250px;', 'fullBase' => true));?></h2>
 										<?php } else { ?>
 										<h2 style="font-size:24px;font-weigth:bold"><?php echo $quote['Client']['name'];?></h2>
 										<?php } ?>
