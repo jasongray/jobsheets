@@ -190,7 +190,7 @@ class Job extends AppModel {
 /**
  * Check customer id exists when adding job
  *
- * @var $check Integar 
+ * @param $check Integar 
  * @return bool
  */
 	public function customerExists($check) {
@@ -215,7 +215,7 @@ class Job extends AppModel {
 /**
  * Check postcode id exists when adding job
  *
- * @var $check Integar 
+ * @param $check Integar 
  * @return bool
  */
 	public function postcodeExists($check) {
@@ -237,8 +237,8 @@ class Job extends AppModel {
 /**
  * Jobs in nice pretty calendar format
  *
- * @var $start Start datetime string
- * @var $end End satetime string
+ * @param $start Start datetime string
+ * @param $end End satetime string
  * @return array
  */
 	public function calendardata($start = null, $end = null) {
@@ -260,6 +260,27 @@ class Job extends AppModel {
 			),
 		));
 
+	}
+
+
+/**
+ * Get the current jobs for the current user
+ *
+ * @return array
+ */
+	public function current() {
+		$this->recursive = 0;
+		return $this->find('all', array(
+			'conditions' => array( 
+				'Job.status <' => 9,
+				'Job.client_id' => CakeSession::read('Auth.User.client_id'),
+				'Job.client_meta' => CakeSession::read('Auth.User.client_meta'),
+			),
+			'order' => array(
+				'Job.allocated ASC'
+			),
+			'limit' => 12
+		));
 	}
 
 }

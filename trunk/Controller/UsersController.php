@@ -186,11 +186,12 @@ class UsersController extends AppController {
 
 		$this->loadModel('Job');
 		$calendar = $this->Job->calendardata();
+		$current = $this->Job->current();
 
 		$this->loadModel('Sysmsg');
-		$messages = $this->Sysmsg->find('all', array('conditions' => array('Sysmsg.status' => 1), 'order' => 'Sysmsg.created ASC'));
+		$messages = $this->Sysmsg->find('all', array('conditions' => array('Sysmsg.status' => 1), 'order' => 'Sysmsg.created DESC'));
 
-		$this->set(compact('invoice', 'jobs', 'quotes', 'calendar', 'messages'));
+		$this->set(compact('invoice', 'jobs', 'quotes', 'calendar', 'messages', 'current'));
 		$this->set('title_for_layout', __('My Dashboard'));
 	}
 
