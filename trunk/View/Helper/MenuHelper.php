@@ -175,10 +175,10 @@ class MenuHelper extends AppHelper  {
 		*/
 		if (isset($l['MenuItem']['iclass']) && !empty($l['MenuItem']['iclass'])) {
 			$i = '<i class="' . $l['MenuItem']['iclass'] . '"></i>';
-			$attr = array_merge(array('escape' => false), $attr);
 		} else {
 			$i = '';
 		}
+		$attr = array_merge(array('escape' => false), $attr);
 
 		if (isset($l['MenuItem']['class']) && !empty($l['MenuItem']['class'])) {
 			$attr = array_merge(array('class' => $l['MenuItem']['class']), $attr);

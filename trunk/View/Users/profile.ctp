@@ -75,4 +75,21 @@
 	</div>
 	<?php } ?>
 </div>
+<div class="row">
+	<div class="col-md-6">
+		<div class="panel panel-primary">
+			<div class="panel-heading">
+				<h4><i class="fa fa-user"></i> <?php echo __('Notification Settings');?></h4>
+			</div>
+			<div class="panel-body">
+				<div class="form-group">
+					<label class="col-md-2 control-label"><?php echo __('Jobs');?></label>
+					<div class="col-md-10">
+						<?php echo $this->Form->input('User.settings.notifications.jobs[]', array('type' => 'checkbox', 'div' => false, 'class' => 'form-control', 'label' => array('text' => __('Email'), 'class' => 'control-label col-md-3'), 'before' => '<div class="col-md-2">', 'after' => '</div>')); ?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 <?php echo $this->Form->end();?>

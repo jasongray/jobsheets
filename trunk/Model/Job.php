@@ -158,6 +158,19 @@ class Job extends AppModel {
 	    return true;
 
 	}
+	
+	public function afterSave($created, $options = array()) {
+		if ($created) {
+			$event = new CakeEvent('Model.Job.new', $this, array(
+			    'data' => $this->data
+			));
+		} else {
+			$event = new CakeEvent('Model.Job.updated', $this, array(
+			    'data' => $this->data
+			));
+		}
+		$this->getEventManager()->attach($event);
+	}
 
 
 /**

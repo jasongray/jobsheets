@@ -112,3 +112,5 @@ CakeLog::config('error', array(
 
 
 CakePlugin::load('Acl', array('bootstrap' => true));
+
+require_once APP . DS . 'Config' . DS . 'events.php';

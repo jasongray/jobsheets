@@ -201,7 +201,7 @@
 		</div>
 	</div>
 	
-	<div class="col-md-8 col-md-pull-4">
+	<div class="col-md-8">
 		<div class="panel panel-success">
 			<div class="panel-heading">
 				<h4><i class="fa fa-calendar"></i> <?php echo __('Job Calendar', true);?></h4>
