@@ -184,6 +184,8 @@ class UsersController extends AppController {
 		$jobs = array('outstanding' => 0);
 		$quotes = array('count' => 0);
 
+		$online = $this->User->onlineUsers();
+
 		$this->loadModel('Job');
 		$calendar = $this->Job->calendardata();
 		$current = $this->Job->current();
@@ -191,7 +193,7 @@ class UsersController extends AppController {
 		$this->loadModel('Sysmsg');
 		$messages = $this->Sysmsg->find('all', array('conditions' => array('Sysmsg.status' => 1), 'order' => 'Sysmsg.created DESC'));
 
-		$this->set(compact('invoice', 'jobs', 'quotes', 'calendar', 'messages', 'current'));
+		$this->set(compact('invoice', 'jobs', 'quotes', 'calendar', 'messages', 'current', 'online'));
 		$this->set('title_for_layout', __('My Dashboard'));
 	}
 
@@ -401,7 +403,7 @@ class UsersController extends AppController {
 				$this->Flash->success('Image was removed', true);
 			}
 		}
-		//$this->redirect(array('action' => 'edit', $id));
+		$this->redirect(array('action' => 'edit', $id));
 	}
 
 // Client logo methods

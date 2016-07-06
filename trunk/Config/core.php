@@ -215,7 +215,12 @@
  * the cake shell command: cake schema create Sessions
  */
 	Configure::write('Session', array(
-		'defaults' => 'php'
+		'defaults' => 'database',
+		'handler' => array(
+			'engine' => 'JobSession',
+			'model' => 'Session',
+			'cache' => 'apc'
+		),
 	));
 
 /**
@@ -383,3 +388,11 @@ Cache::config('_cake_model_', array(
 	'serialize' => ($engine === 'File'),
 	'duration' => $duration
 ));
+
+ Cache::config('apc', array(
+ 	'engine' => 'Apc',
+ 	'duration' => 3600,
+ 	'probability' => 100,
+ 	'prefix' => Inflector::slug(APP_DIR) . '_',
+ ));
+

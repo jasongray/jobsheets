@@ -139,130 +139,181 @@
 </div>
 
 <div class="row">
-	
-	<div class="col-md-4 col-md-push-8">
-		<div class="panel panel-inverse">
-			<div class="panel-heading">
-				<h4><i class="fa fa-newspaper-o"></i> <?php echo __('System Messages', true);?></h4>
-			</div>
-			<div class="panel-body">
-				<div id="threads">
-					<?php if (!empty($messages)) { ?>
-					<ul class="panel-tasks">
-					<?php foreach ($messages as $m) { ?>
-						<li class="item-<?php echo $m['Sysmsg']['label'];?>">
-							<?php echo $this->Resize->image('users/'.$m['User']['avatar'], 35, 35, false, array());?>
-							<label>
-								<span class="task-description"><?php echo $m['Sysmsg']['message'];?></span>
-							</label>
-							<span class="time"><i class="fa fa-clock-o"></i> <?php echo $this->Time->format('d F Y', $m['Sysmsg']['created']);?></span>
-						</li>
-					<?php } ?>
-					</ul>
-					<?php } ?>
-				</div>
-			</div>
-		</div>
-	</div>
-	
-	<div class="col-md-8 col-md-pull-4">
-		<div class="panel panel-midnightblue">
-			<div class="panel-heading">
-				<h4><i class="fa fa-wrench"></i> <?php echo __('Current Jobs', true);?></h4>
-			</div>
-			<div class="panel-body">
-				<?php echo $this->Html->link('<i class="fa fa-plus"></i> '.__('Create a job'), array('controller' => 'jobs', 'action' => 'add'), array('class' => 'btn btn-success pull-right', 'style' => 'margin-bottom:20px;', 'escape' => false));?>
-				<?php if (!empty($current)){ ?>
-				<table class="table table-condensed">
-					<tr>
-						<th><?php echo __('Job ID');?></th>
-						<th><?php echo __('Title');?></th>
-						<th class="hidden-xs"><?php echo __('Customer');?></th>
-						<th class="hidden-xs"><?php echo __('Allocated');?></th>
-						<th><?php echo __('Due');?></th>
-					</tr>
-					<?php foreach ($current as $j){ ?>
-					<?php $class = '';?>
-					<?php if ($j['Job']['status'] == 0) { $class = 'warning'; }?>
-					<?php if ($j['Job']['status'] == 2) { $class = 'info'; }?>
-					<tr class="<?php echo $class;?>">
-						<td><?php echo $this->Html->link($j['Job']['id'], array('controller' => 'jobs', 'action' => 'view', $j['Job']['id']));?></td>
-						<td><?php echo $j['Job']['title'];?></td>
-						<td class="hidden-xs"><?php echo $j['Customer']['name'];?></td>
-						<td class="hidden-xs"><?php echo $j['User']['firstname'];?></td>
-						<td><?php echo $this->Time->format('d M Y', $j['Job']['dueby']);?></td>
-					</tr>
-					<?php } ?>
-				</table>
-				<?php } else { ?>
-				
-				<?php } ?>
-			</div>
-		</div>
-	</div>
-	
-	<div class="col-md-8">
-		<div class="panel panel-success">
-			<div class="panel-heading">
-				<h4><i class="fa fa-calendar"></i> <?php echo __('Job Calendar', true);?></h4>
-			</div>
-			<div class="panel-body">
-				<div id="calendar-wrap">
-					<?php $events = json_encode(array());?>
-					<?php if (!empty($calendar)) {
-						$events = array();
-						foreach ($calendar as $e) {
-							if (empty($e['Job']['finishby'])) {
-								$e['Job']['finishby'] = date('Y-m-d\TH:i:s', strtotime($e['Job']['allocated']) + 60*60);
-							}
-							$events[] = array(
-								'id' => $e['Job']['reference'], 
-								'start' => date('Y-m-d\TH:i:s', strtotime($e['Job']['allocated'])), 
-								'end' => $e['Job']['finishby'],
-								'title' => $e['Job']['title'],
-							);
-						}
-						$events = json_encode($events);
-					} ?>
-				</div>
-			</div>
-		</div>
-	</div>
-	<?php echo $this->Html->script(array('plugins/fullcalendar/fullcalendar.min'), array('inline' => false));?>
-	<?php echo $this->Html->scriptBlock("
-	$(document).ready(function() {
-		var calendar = $('#calendar-wrap').fullCalendar({
-			header: {
-				left: 'prev,next today',
-				center: 'title',
-				right: 'month,agendaWeek,agendaDay'
-			},
-			defaultView: 'month',
-			eventLimit: true,
-			buttonText: {
-				prev: '<i class=\"fa fa-angle-left\"></i>',
-				next: '<i class=\"fa fa-angle-right\"></i>',
-				prevYear: '<i class=\"fa fa-angle-double-left\"></i>',  // <<
-				nextYear: '<i class=\"fa fa-angle-double-right\"></i>',  // >>
-				today:    '".__('Today')."',
-				month:    '".__('Month')."',
-				week:     '".__('Week')."',
-				day:      '".__('Day')."'
-			},
-			titleFormat: {
-				month: 'MMMM yyyy',
-				week: \"d MMM [ yyyy]{ '&#8212;' d MMM yyyy}\",
-				day: 'dddd, MMM d, yyyy'
-			},
-			columnFormat: {
-				month: 'ddd',
-				week: 'ddd d/M',
-				day: 'dddd d/M'
-			},
-			events: ".$events.",
-		});
-	});", array('inline' => false));?>
 
+	<div class="col-sm-12 col-md-8">
+		<div class="row">
+
+			<div class="col-md-12">
+				<div class="panel panel-midnightblue">
+					<div class="panel-heading">
+						<h4><i class="fa fa-wrench"></i> <?php echo __('Current Jobs', true);?></h4>
+					</div>
+					<div class="panel-body">
+						<?php echo $this->Html->link('<i class="fa fa-plus"></i> '.__('Create a job'), array('controller' => 'jobs', 'action' => 'add'), array('class' => 'btn btn-success pull-right', 'style' => 'margin-bottom:20px;', 'escape' => false));?>
+						<?php if (!empty($current)){ ?>
+						<table class="table table-condensed">
+							<tr>
+								<th><?php echo __('Job ID');?></th>
+								<th><?php echo __('Title');?></th>
+								<th class="hidden-xs"><?php echo __('Customer');?></th>
+								<th class="hidden-xs"><?php echo __('Allocated');?></th>
+								<th><?php echo __('Due');?></th>
+							</tr>
+							<?php foreach ($current as $j){ ?>
+							<?php $class = '';?>
+							<?php if ($j['Job']['status'] == 0) { $class = 'warning'; }?>
+							<?php if ($j['Job']['status'] == 2) { $class = 'info'; }?>
+							<tr class="<?php echo $class;?>">
+								<td><?php echo $this->Html->link($j['Job']['id'], array('controller' => 'jobs', 'action' => 'view', $j['Job']['id']));?></td>
+								<td><?php echo $j['Job']['title'];?></td>
+								<td class="hidden-xs"><?php echo $j['Customer']['name'];?></td>
+								<td class="hidden-xs"><?php echo $j['User']['firstname'];?></td>
+								<td><?php echo $this->Time->format('d M Y', $j['Job']['dueby']);?></td>
+							</tr>
+							<?php } ?>
+						</table>
+						<?php } else { ?>
+						
+						<?php } ?>
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-md-12">
+				<div class="panel panel-success">
+					<div class="panel-heading">
+						<h4><i class="fa fa-calendar"></i> <?php echo __('Job Calendar', true);?></h4>
+					</div>
+					<div class="panel-body">
+						<div id="calendar-wrap">
+							<?php $events = json_encode(array());?>
+							<?php if (!empty($calendar)) {
+								$events = array();
+								foreach ($calendar as $e) {
+									if (empty($e['Job']['finishby'])) {
+										$e['Job']['finishby'] = date('Y-m-d\TH:i:s', strtotime($e['Job']['allocated']) + 60*60);
+									}
+									$events[] = array(
+										'id' => $e['Job']['reference'], 
+										'start' => date('Y-m-d\TH:i:s', strtotime($e['Job']['allocated'])), 
+										'end' => $e['Job']['finishby'],
+										'title' => $e['Job']['title'],
+									);
+								}
+								$events = json_encode($events);
+							} ?>
+						</div>
+					</div>
+				</div>
+			</div>
+			<?php echo $this->Html->script(array('plugins/fullcalendar/fullcalendar.min'), array('inline' => false));?>
+			<?php echo $this->Html->scriptBlock("
+			$(document).ready(function() {
+				var calendar = $('#calendar-wrap').fullCalendar({
+					header: {
+						left: 'prev,next today',
+						center: 'title',
+						right: 'month,agendaWeek,agendaDay'
+					},
+					defaultView: 'month',
+					eventLimit: true,
+					buttonText: {
+						prev: '<i class=\"fa fa-angle-left\"></i>',
+						next: '<i class=\"fa fa-angle-right\"></i>',
+						prevYear: '<i class=\"fa fa-angle-double-left\"></i>',  // <<
+						nextYear: '<i class=\"fa fa-angle-double-right\"></i>',  // >>
+						today:    '".__('Today')."',
+						month:    '".__('Month')."',
+						week:     '".__('Week')."',
+						day:      '".__('Day')."'
+					},
+					titleFormat: {
+						month: 'MMMM yyyy',
+						week: \"d MMM [ yyyy]{ '&#8212;' d MMM yyyy}\",
+						day: 'dddd, MMM d, yyyy'
+					},
+					columnFormat: {
+						month: 'ddd',
+						week: 'ddd d/M',
+						day: 'dddd d/M'
+					},
+					events: ".$events.",
+				});
+			});", array('inline' => false));?>
+
+		</div>
+	</div>
+
+	<div class="col-sm-12 col-md-4">
+		<div class="row">
+
+			<div class="col-md-12">
+				<div class="panel panel-brown">
+					<div class="panel-heading">
+						<h4><i class="fa fa-newspaper-o"></i> <?php echo __('System Messages', true);?></h4>
+					</div>
+					<div class="panel-body">
+						<div id="threads" style="height:auto;max-height:none;">
+							<?php if (!empty($messages)) { ?>
+							<ul class="panel-tasks">
+							<?php foreach ($messages as $m) { ?>
+								<li class="item-<?php echo $m['Sysmsg']['label'];?>">
+									<?php if (empty($u['User']['avatar'])) { $_img = 'avatar-1.jpg'; } else { $_img = $u['User']['avatar']; } ?>
+									<?php echo $this->Resize->image($_img, 40, 40, false, array());?>
+									<label>
+										<span class="task-description"><?php echo $m['Sysmsg']['message'];?></span>
+									</label>
+									<span class="time">
+										<i class="fa fa-clock-o"></i> 
+										<?php echo $this->Time->format('d F Y', $m['Sysmsg']['created']);?>
+									</span>
+								</li>
+							<?php } ?>
+							</ul>
+							<?php } ?>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-12">
+				<div class="panel panel-indigo">
+					<div class="panel-heading">
+						<h4><i class="fa fa-group"></i> <?php echo __('Users', true);?></h4>
+					</div>
+					<div class="panel-body">
+						<div id="threads">
+							<?php if (!empty($online)) { ?>
+							<ul class="panel-users">
+							<?php foreach ($online as $u) { ?>
+								<li>
+									<?php if (empty($u['User']['avatar'])) { $_img = 'avatar-1.jpg'; } else { $_img = $u['User']['avatar']; } ?>
+									<?php echo $this->Resize->image($_img, 40, 40, false, array());?>
+									<div class="content">
+										<span class="desc">
+											<?php echo $u['User']['name'];?>
+											<?php if (!empty($u['User']['session'])) { ?>
+											<span class="label label-success pull-right"><?php echo __('Online');?></span>
+											<?php } else { ?>
+											<span class="label label-default pull-right"><?php echo __('Offline');?></span>
+											<?php } ?>
+										</span>
+										<span class="time">
+											<i class="fa fa-clock-o"></i> 
+											<?php echo $this->Time->timeAgoInWords($u['User']['lastactive']);?>
+										</span>
+									</div>
+								</li>
+							<?php } ?>
+							</ul>
+							<?php } ?>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
 </div>
 
 <?php /*   ADD MORE BITS HERE */ ?>

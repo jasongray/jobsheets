@@ -213,6 +213,49 @@ class User extends AppModel {
 	 	return false;
 	}
 
+	public function onlineUsers() {
+		$modelName = Configure::read('Session.handler.model');
+		if (empty($modeName)) {
+			$modelName = 'Session';
+		}
+		$this->unBindModel(array(
+			'belongsTo' => array(
+				'Role', 'Client',
+			),
+		));
+		$this->bindModel(array(
+			'hasOne' => array(
+				$modelName => array(
+					'className' => $modelName,
+					'foreignKey' => 'user_id',
+					'conditions' => array(
+						"$modelName.expires >" => time(),
+					),
+				)	
+			),
+		));
+		$this->virtualFields = array(
+			'name' => 'IF(CONCAT_WS(" ", User.firstname, User.lastname) IS NULL, User.email, CONCAT_WS(" ", User.firstname, User.lastname))',
+			'session' => "IF($modelName.id != '', $modelName.id, NULL)",
+		);
+		$results = $this->find('all', array(
+			'fields' => array(
+				'name',
+				'avatar',
+				'lastactive',
+				'session',
+			),
+			'conditions' => array(
+				'User.client_id' => CakeSession::read('Auth.User.client_id'), 
+				'User.client_meta' => CakeSession::read('Auth.User.client_meta'),
+			),
+			'order' => 'User.id',
+			'group' => 'User.id',
+		));
+		$this->virtualFields = array();
+		return $results;
+	}
+
 /**
  * generate a set of random numbers
  *

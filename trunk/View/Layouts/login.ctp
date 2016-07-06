@@ -13,7 +13,7 @@
 </head>
 <body class="focusedform">
     <div class="verticalcenter">
-        <?php echo $this->Html->image('jobsheets-logo-1000x550.svg', array('alt' => 'JobSheets', 'width' => '100%'));?>
+        <?php echo $this->Html->image('jobsheets-logo-lg.png', array('alt' => 'JobSheets', 'class' => 'img-responsive', 'style' => 'width:100%;'));?>
         <div class="panel panel-primary">
             <?php echo $this->fetch('content');?>
         </div>
