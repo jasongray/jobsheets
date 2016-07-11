@@ -76,65 +76,29 @@ class JobsController extends AppController {
  */
 	public function index() {
 		$template = 'index';
-		$this->Job->recursive = 2;
-
-		$this->Job->unBindModel(array('hasMany' => array('JobItem')), false);
-		$this->Job->Client->unBindModel(array('hasMany' => array('User')), false);
-		$this->Job->Location->unBindModel(array('hasMany' => array('Job')), false);
-		$this->Job->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
-		
-		$role = $this->Session->read('Auth.User.role_id');
-		$template = $this->Session->read('Auth.User.Client.template');
-		if (isset($this->request->params['named']['status'])) {
-			if ($this->request->params['named']['status'] == 'completed') {
-				$JobStatus = array('Job.status' => 8);
-			}
-			if ($this->request->params['named']['status'] == 'cancelled') {
-				$JobStatus = array('Job.status' => 9);
-			}
-			$class_status = $this->request->params['named']['status'];
+		if (isset($this->request->params['named']['status'])){
+			$status = $this->request->params['named']['status'];
 		} else {
-			$JobStatus = $JobStatus = array('Job.status <' => 8);
-			$class_status = 'default';
+			$status = false;
 		}
-
-		switch ($role) {
-			case 1:
-				$this->paginate = array('limit' => 25, 'order' => array('Job.client_id ASC', 'Job.id DESC'));
-				$template = 'admin_index';
-				break;
-			case 2:
-			case 3:
-				$this->paginate = array(
-					'conditions' => array_merge(array(
-						'Job.client_id' => $this->Session->read('Auth.User.client_id'),
-						'Job.client_meta' => $this->Session->read('Auth.User.client_meta'),
-						), $JobStatus
-					),
-					'limit' => 25, 
-					'order' => array('Job.created ASC, Job.status ASC'),
-				);
-				$template = 'index';
-				break;
-			case 4:
-			default:
-				$this->paginate = array(
-					'conditions' => array_merge(array(
-						'Job.user_id' => $this->Session->read('Auth.User.id'),
-						'Job.client_id' => $this->Session->read('Auth.User.client_id'),
-						'Job.client_meta' => $this->Session->read('Auth.User.client_meta'),
-						), $JobStatus
-					),
-					'limit' => 25, 
-					'order' => array('Job.status ASC, Job.created ASC'),
-				);
-				$template = 'index_user';
-				break;
-		}
-
+		$resp = $this->Job->getJobs($status);
+		$this->paginate = $resp['out'];
 		$this->set('data', $this->paginate());
-		$this->set(compact('class_status'));
-		$this->render($template);
+		$this->set('class_status', $resp['class_status']);
+		$this->render($resp['template']);
+	}
+
+/**
+ * Job index method
+ *
+ * Displays list of current jobs allocated to the current user.
+ *
+ * @return array  (Variable sent to the view will always be called data just to make things easier)
+ */
+	public function profile() {
+		$resp = $this->Job->getJobs(false, true);
+		$this->paginate = $resp['out'];
+		$this->set('data', $this->paginate());
 	}
 
 /**

@@ -71,6 +71,10 @@ class AppController extends Controller {
 			'loginRedirect' => array('controller' => 'jobs', 'action' => 'index'),
 		),
 		'Acl',
+		'Security' => array(
+			'blackHoleCallback' => 'blackhole',
+			'requireAuth' => true,
+		),
 		'Session',
 		'Cookie',
 		'RequestHandler',

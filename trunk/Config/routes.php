@@ -32,6 +32,7 @@
 	Router::connect('/pages/*', array('controller' => 'pages', 'action' => 'display'));
 
 	Router::connect('/my-profile', array('controller' => 'users', 'action' => 'profile'));
+	Router::connect('/my-jobs', array('controller' => 'jobs', 'action' => 'profile'));
 
 	Router::connect('/calendar', array('controller' => 'jobs', 'action' => 'calendar'));
 

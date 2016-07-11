@@ -17,8 +17,8 @@
  * @since         JobSheets v 0.0.1
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-
 App::uses('AppModel', 'Model');
+App::uses('CakeEvent', 'Event');
 
 /**
  * Job Model
@@ -275,7 +275,6 @@ class Job extends AppModel {
 
 	}
 
-
 /**
  * Get the current jobs for the current user
  *
@@ -294,6 +293,79 @@ class Job extends AppModel {
 			),
 			'limit' => 12
 		));
+	}
+
+
+/**
+ * Get jobs for the index view
+ *
+ * @param string $status
+ * @param bool $role - Override role and return user jobs only
+ * @return array
+ */
+	public function getJobs($status = null, $role = false) {
+		$this->recursive = 2;
+		
+		$this->unBindModel(array('hasMany' => array('JobItem')), false);
+		$this->Client->unBindModel(array('hasMany' => array('User')), false);
+		$this->Location->unBindModel(array('hasMany' => array('Job')), false);
+		$this->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
+		
+		if (!$role) {
+			$role = CakeSession::read('Auth.User.role_id');
+		}
+		$template = CakeSession::read('Auth.Client.template');
+		$client_id = CakeSession::read('Auth.User.client_id');
+		$client_meta = CakeSession::read('Auth.User.client_meta');
+
+		$JobStatus = array('Job.status <' => 8);
+		$class_status = 'default';
+
+		if (isset($status) && !empty($status)) {
+			if ($status == 'completed') {
+				$JobStatus = array('Job.status' => 8);
+			}
+			if ($status == 'cancelled') {
+				$JobStatus = array('Job.status' => 9);
+			}
+			$class_status = $status;
+		} 
+
+		switch ($role) {
+			case 1:
+				$out = array('limit' => 25, 'order' => array('Job.client_id ASC', 'Job.id DESC'));
+				$template = 'admin_index';
+				break;
+			case 2:
+			case 3:
+				$out = array(
+					'conditions' => array_merge(array(
+						'Job.client_id' => $client_id,
+						'Job.client_meta' => $client_meta,
+						), $JobStatus
+					),
+					'limit' => 25, 
+					'order' => array('Job.created ASC, Job.status ASC'),
+				);
+				$template = 'index';
+				break;
+			case 4:
+			default:
+				$out = array(
+					'conditions' => array_merge(array(
+						'Job.user_id' => CakeSession::read('Auth.User.id'),
+						'Job.client_id' => $client_id,
+						'Job.client_meta' => $client_meta,
+						), $JobStatus
+					),
+					'limit' => 25, 
+					'order' => array('Job.status ASC, Job.created ASC'),
+				);
+				$template = 'index_user';
+				break;
+		}
+		return compact('out', 'template', 'class_status');
+
 	}
 
 }
