@@ -5,6 +5,7 @@
 <?php echo $this->Form->input('phone', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Phone Number'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
 <?php echo $this->Form->input('billingrate', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Charge Rate'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
 
+<?php echo $this->start('panel-footer');?>
 <div class="panel-footer">
 <?php
 	echo $this->Form->hidden('id');
@@ -15,4 +16,6 @@
 	}
 ?>	
 </div>
+<?php echo $this->end();?>
+
 <?php echo $this->element('Forms/form-javascript');?>

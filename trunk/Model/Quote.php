@@ -133,6 +133,70 @@ class Quote extends AppModel {
 
 	}
 
+/**
+ * Get quotes for specified user conditions.
+ *
+ * @param array $conditions
+ * @return array
+ */
+	public function conditions($conditions = array(), $limit = 25, $order = array()){
+		$this->recursive = 2;
+
+		$this->unBindModel(array('hasMany' => array('QuoteItem')), false);
+		$this->Client->unBindModel(array('hasMany' => array('User')), false);
+		$this->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
+		
+		$user = CakeSession::read('Auth.User.id');
+		$client = CakeSession::read('Auth.User.client_id');
+		$meta = CakeSession::read('Auth.User.client_meta');
+		$role = CakeSession::read('Auth.User.role_id');
+		$template = CakeSession::read('Auth.User.Client.template');
+
+		switch ($role) {
+			case 1:
+				$order = array_merge(
+					array(
+						'Quote.client_id ASC',
+						'Quote.id DESC'
+					)
+				);
+				$template = 'admin_index';
+				break;
+			case 2:
+			case 3:
+				$conditions = array_merge($conditions, 
+					array(
+						'Quote.client_id' => $client,
+						'Quote.client_meta' => $meta,
+					)
+				);
+				$order = array_merge($order, 
+					array(
+						'Quote.created ASC, Quote.status ASC'
+					)
+				);
+				$template = 'index';
+				break;
+			case 4:
+			default:
+				$conditions = array_merge($conditions,
+					array(
+						'Quote.user_id' => $user,
+						'Quote.client_id' => $client,
+						'Quote.client_meta' => $meta,
+					)
+				);
+				$order = array_merge($order, 
+					array(
+						'Quote.status ASC, Quote.created ASC'
+					)
+				);
+				$template = 'index_user';
+				break;
+		}
+		
+		return array('conditions' => $conditions, 'limit' => $limit, 'order' => $order, 'template' => $template);
+	}
 
 /**
  * Generate a unique ID based on octal timestamp

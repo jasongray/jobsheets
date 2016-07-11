@@ -22,16 +22,28 @@
 <?php echo $this->Form->input('parent_id', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Parent Item'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'options' => $parents, 'empty' => '')); ?>
 <?php echo $this->Form->input('menu_id', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Menu selection'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'options' => $menus, 'selected' => $this->passedArgs['menu_id'], 'empty' => '')); ?>
 <?php echo $this->Form->input('permissions', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Select Group'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '<span class="help-block align-right">'.__('Select the lowest group who can access this menu item. Leave blank for all user levels.').'</span></div>', 'options' => $_groups, 'data-placeholder' => __('Lowest group who can access this menu item?'), 'empty' => ''));?>
+
+<?php echo $this->start('panel-footer');?>
 <div class="panel-footer">
-<?php
-	echo $this->Form->hidden('id');
-	echo $this->Form->submit('Save', array('class'=>'btn btn-primary', 'div' => false)); 
-	echo $this->Html->link('Cancel', array('controller' => 'menuItems', 'action' => 'cancel', 'plugin' => false, 'menu_id' => $this->passedArgs['menu_id']), array('class' => 'btn btn-default'));
-	if(!empty($this->data['MenuItem']['id'])){
-		echo $this->Html->link('Delete', array('controller' => 'menuItems', 'action' => 'delete', 'plugin' => false, $this->data['MenuItem']['id'], 'menu_id' => $this->passedArgs['menu_id']), array('class' => 'btn btn-danger'));
-	}
-?>	
+	<div class="row">
+		<div class="col-md-6">
+			<div class="btn-toolbar">
+				<?php echo $this->Form->submit('Save', array('class'=>'btn btn-primary', 'div' => false)); ?>
+				<?php echo $this->Html->link('Cancel', array('controller' => 'menuItems', 'action' => 'cancel', 'plugin' => false, 'menu_id' => $this->passedArgs['menu_id']), array('class' => 'btn btn-default')); ?>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="btn-toolbar">
+				<?php if(!empty($this->data['MenuItem']['id'])){ ?>
+					<?php echo $this->Form->hidden('id');?>
+					<?php echo $this->Html->link('Delete', array('controller' => 'menuItems', 'action' => 'delete', 'plugin' => false, $this->data['MenuItem']['id'], 'menu_id' => $this->passedArgs['menu_id']), array('class' => 'btn btn-danger pull-right')); ?>
+				<?php } ?>
+			</div>
+		</div>
+	</div>
 </div>
+<?php echo $this->end();?>
+
 <?php echo $this->element('Forms/form-javascript');?>
 <?php echo $this->Html->scriptBlock("
 $(document).ready(function(){

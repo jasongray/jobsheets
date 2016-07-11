@@ -111,25 +111,29 @@
                     <a class="panel-collapse" href="javascript:;"><i class="fa fa-chevron-down"></i></a>
                 </div>
             </div>
-            <div class="panel-body">                
+            <div class="panel-body">  
+				<div class="row">              
                 <?php echo $this->Form->input('notes', array('class' => 'form-control wysiwyg', 'label' => array('class' => 'col-md-2 col-lg-1 control-label', 'text' => __('Customer Notes')), 'between' => '<div class="col-md-10">', 'after' => '<div class="help-block">'.__('This information is displayed at the bottom of the quote').'</div></div>', 'div' => 'form-group'));?>
+				</div>
             </div>
-            <div class="panel-footer">
-                <div class="row">
-                    <div class="col-sm-6 col-sm-offset-1">
-                        <div class="btn-toolbar">
-                            <?php echo $this->Form->hidden('id');?>
-                            <?php echo $this->Form->submit(__('Save'), array('div' => false, 'class' => 'btn-primary btn'));?>
-                            <?php echo $this->Html->link(__('Cancel'), array('action' => 'cancel'), array('class' => 'btn-default btn'));?>
-                        </div>
-                    </div>
-                    <div class="col-sm-2 col-sm-offset-2">
-                        <div class="btn-toolbar">
-                            <?php echo $this->Html->link(__('Delete Job'), array('action' => 'delete', $this->data['Quote']['id']), array('class' => 'btn-danger btn'));?>
-                        </div>
-                    </div>
-                </div>
-            </div>
+			<div class="panel-footer">
+				<div class="row">
+					<div class="col-md-6 col-md-offset-2 col-lg-offset-1">
+						<div class="btn-toolbar">
+							<?php echo $this->Form->submit('Save', array('class'=>'btn btn-primary', 'div' => false)); ?>
+							<?php echo $this->Html->link('Cancel', array('controller' => 'quotes', 'action' => 'cancel', 'plugin' => false), array('class' => 'btn btn-default')); ?>
+						</div>
+					</div>
+					<div class="col-md-4">
+						<div class="btn-toolbar">
+							<?php if(!empty($this->data['Quote']['id'])){ ?>
+								<?php echo $this->Form->hidden('id');?>
+								<?php echo $this->Html->link('Delete', array('controller' => 'quotes', 'action' => 'delete', 'plugin' => false, $this->data['Quote']['id']), array('class' => 'btn btn-danger pull-right')); ?>
+							<?php } ?>
+						</div>
+					</div>
+				</div>
+			</div>
         </div>
     </div>
 </div>

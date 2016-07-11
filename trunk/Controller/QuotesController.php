@@ -48,51 +48,9 @@ class QuotesController extends AppController {
  * @return array  (Variable sent to the view will always be called data just to make things easier)
  */
 	public function index() {
-		$template = 'index';
-		$this->Quote->recursive = 2;
-
-		$this->Quote->unBindModel(array('hasMany' => array('QuoteItem')), false);
-		$this->Quote->Client->unBindModel(array('hasMany' => array('User')), false);
-		$this->Quote->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
-		
-		$role = $this->Session->read('Auth.User.role_id');
-		$template = $this->Session->read('Auth.User.Client.template');
-
-		switch ($role) {
-			case 1:
-				$this->paginate = array('limit' => 25, 'order' => array('Quote.client_id ASC', 'Quote.id DESC'));
-				$template = 'admin_index';
-				break;
-			case 2:
-			case 3:
-				$this->paginate = array(
-					'conditions' => array(
-						'Quote.client_id' => $this->Session->read('Auth.User.client_id'),
-						'Quote.client_meta' => $this->Session->read('Auth.User.client_meta'),
-					),
-					'limit' => 25, 
-					'order' => array('Quote.created ASC, Quote.status ASC'),
-				);
-				$template = 'index';
-				break;
-			case 4:
-			default:
-				$this->paginate = array(
-					'conditions' => array(
-						'Quote.user_id' => $this->Session->read('Auth.User.id'),
-						'Quote.client_id' => $this->Session->read('Auth.User.client_id'),
-						'Quote.client_meta' => $this->Session->read('Auth.User.client_meta'),
-					),
-					'limit' => 25, 
-					'order' => array('Quote.status ASC, Quote.created ASC'),
-				);
-				$template = 'index_user';
-				break;
-		}
-
+		$this->paginte = $this->Quote->conditions();
 		$this->set('data', $this->paginate());
-
-		$this->render($template);
+		$this->render($this->paginte['template']);
 	}
 
 /**
@@ -110,8 +68,7 @@ class QuotesController extends AppController {
 		if (!$this->request->is('ajax')) {
 			$this->joblog($this->Quote->id, __('Quote viewed by user %s', $this->Session->read('Auth.User.id')));
 		}
-		$this->data = $this->Quote->find('first', array('conditions' => array('Quote.client_id' => $this->Session->read('Auth.User.client_id'), 'Quote.client_meta' => $this->Session->read('Auth.User.client_meta'), 'Quote.id' => $id)));
-		$this->Quote->QuoteItem->updateTotal($id);
+		$this->data = $this->Quote->find('first', $this->Quote->conditions(array('Quote.id' => $id)));
 		$this->set('title_for_layout', __('View Quote').sprintf(' %s', $this->data['Quote']['id']));
 	}
 
@@ -206,7 +163,7 @@ class QuotesController extends AppController {
 			}
 		}
 
-		$this->data = $this->Quote->find('first', array('conditions' > array('Quote.client_id' => $this->Session->read('Auth.User.client_id'), 'Quote.client_meta' => $this->Session->read('Auth.User.client_meta'), 'Quote.id' => $id)));
+		$this->data = $this->Quote->find('first', $this->Quote->conditions(array('Quote.id' => $id)));
 		$this->render('view');
 	}
 
@@ -234,7 +191,7 @@ class QuotesController extends AppController {
 				$this->Flash->error(__('Please fix any errors before continuing.'));
 			}
 		}
-		$this->data = $this->Quote->find('first', array('conditions' => array('Quote.client_id' => $this->Session->read('Auth.User.client_id'), 'Quote.client_meta' => $this->Session->read('Auth.User.client_meta'), 'Quote.id' => $id)));
+		$this->data = $this->Quote->find('first', $this->Quote->conditions(array('Quote.id' => $id)));
 		$this->Quote->User->virtualFields = array('fullname' => 'CONCAT(firstname, " ", lastname)');
 		$this->set('users', $this->Quote->User->find('list', array('fields' => array('id', 'fullname'), 'conditions' => array('User.client_id' => $this->Session->read('Auth.User.client_id')))));
 		$this->loadModel('Tax');

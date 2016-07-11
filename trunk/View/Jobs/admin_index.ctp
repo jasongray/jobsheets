@@ -3,6 +3,13 @@
 <?php $this->Paginator->options(array('url' => $this->passedArgs)); ?>
 <?php $this->Html->addCrumb(__('Admin Jobs'));?>
 <?php echo $this->Html->css(array('datatables'), array('inline' => false));?>
+<?php echo $this->start('heading');?>
+<div class="options">
+    <div class="btn-toolbar">
+        <?php echo $this->Html->link('<i class="fa fa-plus"></i> ' . __('New Job'), array('controller' => 'jobs', 'action' => 'add'), array('class' => 'btn btn-primary', 'escape' => false));?>
+    </div>
+</div>
+<?php echo $this->end();?>
 <div class="row">
 	<div class="col-md-12">
 		<div class="panel panel-midnightblue">

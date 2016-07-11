@@ -3,6 +3,13 @@
 <?php $this->Paginator->options(array('url' => $this->passedArgs)); ?>
 <?php $this->Html->addCrumb(__('Users'));?>
 <?php echo $this->Html->css(array('datatables'), array('inline' => false));?>
+<?php echo $this->start('heading');?>
+<div class="options">
+    <div class="btn-toolbar">
+        <?php echo $this->Html->link('<i class="fa fa-plus"></i> ' . __('Create User'), array('controller' => 'users', 'action' => 'add'), array('class' => 'btn btn-warning', 'escape' => false));?>
+    </div>
+</div>
+<?php echo $this->end();?>
 <div class="row">
 	<div class="col-md-12">
 		<div class="panel panel-midnightblue">
@@ -11,7 +18,6 @@
 				
 			</div>
 			<div class="panel-body">
-				<?php echo $this->Html->link('Create User', array('action' => 'add'), array('class'=>'btn btn-warning', 'escape' => false))?>
 				<table cellpadding="0" cellspacing="0" class="table table-hover table-striped">
 					<thead>
 					<tr>

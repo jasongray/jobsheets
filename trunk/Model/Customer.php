@@ -89,5 +89,72 @@ class Customer extends AppModel {
 	    return true;
 
 	}
+
+
+/**
+ * Get customer for specified user conditions.
+ *
+ * @param array $conditions
+ * @return array
+ */
+	public function conditions($conditions = array(), $limit = 25, $order = array(), $joins = false){
+		$this->recursive = 2;
+	
+		$client = CakeSession::read('Auth.User.client_id');
+		$meta = CakeSession::read('Auth.User.client_meta');
+		$role = CakeSession::read('Auth.User.role_id');
+
+		switch ($role) {
+			case 1:
+				$this->bindModel(array(
+					'belongsTo' => array(
+						'Client' => array(
+							'className' => 'Client',
+							'foreignKey' => 'client_id',
+						),
+					),
+				));
+				$order = array_merge(
+					array(
+						'Customer.client_id ASC',
+						'Customer.id DESC'
+					)
+				);
+				$template = 'admin_index';
+				break;
+			case 2:
+			case 3:
+				$conditions = array_merge($conditions, 
+					array(
+						'Customer.client_id' => $client,
+						'Customer.client_meta' => $meta,
+					)
+				);
+				$order = array_merge($order, 
+					array(
+					'Customer.created ASC, Customer.status ASC'
+					)
+				);
+				$template = 'index';
+				break;
+			case 4:
+			default:
+				$conditions = array_merge($conditions,
+					array(
+						'Customer.client_id' => $client,
+						'Customer.client_meta' => $meta,
+					)
+				);
+				$order = array_merge($order, 
+					array(
+						'Customer.status ASC, Customer.created ASC'
+					)
+				);
+				$template = 'index_user';
+				break;
+		}
+	
+		return array('conditions' => $conditions, 'limit' => $limit, 'order' => $order, 'joins' => array(), 'template' => $template);
+	}
 	
 }
