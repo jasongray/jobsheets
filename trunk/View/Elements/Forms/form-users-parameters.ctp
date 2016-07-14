@@ -20,4 +20,8 @@
 		<?php if (!empty($this->data['User']['lastactive'])){ echo $this->Time->timeAgoInWords($this->data['User']['lastactive'], array('end' => '+1 year')); } else { echo __('Never'); } ?>
 	</div>
 </div>
+<?php if($this->Session->read('Auth.User.role_id') == 1){ ?>
 <?php echo $this->Form->input('client_id', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Client'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'empty' => '')); ?>
+<?php } else { ?>
+<?php echo $this->Form->hidden('client_id', array('value' => $this->Session->read('Auth.User.client_id'))); ?>
+<?php } ?>
