@@ -73,7 +73,6 @@ class AppController extends Controller {
 		'Acl',
 		'Security' => array(
 			'blackHoleCallback' => 'blackhole',
-			'requireAuth' => true,
 		),
 		'Session',
 		'Cookie',
@@ -97,8 +96,9 @@ class AppController extends Controller {
 	    $this->Cookie->key = 'ao8]$E^d4y0t9194q64%9G_%0G1^B,Wemi1y.i5!m3+[V$_9*6./ex';
 	    $this->Cookie->httpOnly = true;
 	    $this->Cookie->type('aes');
-	}
 
+	    $this->Security->blackHoleCallback = 'blackhole';
+	}
 
 /**
  * Before Render method
@@ -124,6 +124,16 @@ class AppController extends Controller {
 		$this->redirect(array('action' => 'index'));
 	}
 
+/**
+ * Blackhole method
+ *
+ * callback function executed before rendering of the view.
+ *
+ * @return void
+ */	
+	public function blackhole($type) {
+		//pr($type);
+	}
 
 /** 
  * Records a log history into the joblog table

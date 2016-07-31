@@ -4,9 +4,27 @@
 <?php $this->Html->addCrumb(__('Job List'), array('controller' => 'jobs', 'action' => 'index'));?>
 <?php $this->Html->addCrumb(__('View Job ') . $this->data['Job']['id']);?>
 <?php echo $this->Html->css(array('datatables', 'plugins/jquery-ui', 'plugins/timepicker', 'plugins/signature-pad'), array('block' => 'css'));?>
+<?php echo $this->start('heading');?>
+<div class="options">
+    <div class="btn-toolbar">
+        <?php if (empty($this->data['Job']['onscene']) && empty($this->data['Job']['backon']) && empty($this->data['Job']['completed'])) { ?>
+        <?php echo $this->Html->link('<i class="fa fa-download"></i> '.__('On Scene'), array('action' => 'update', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-primary btn-label btn-updatejob', 'data-type' => 'onscene', 'escape' => false));?>
+        <?php } else ?>
+        <?php if (!empty($this->data['Job']['onscene']) && empty($this->data['Job']['backon']) && empty($this->data['Job']['completed'])) { ?>
+        <?php echo $this->Html->link('<i class="fa fa-upload"></i> '.__('Back On'), array('action' => 'update', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-success btn-label btn-updatejob', 'data-type' => 'backon', 'escape' => false));?>
+        <?php } else ?>
+        <?php if (!empty($this->data['Job']['onscene']) && !empty($this->data['Job']['backon']) && empty($this->data['Job']['completed'])) { ?>
+        <?php echo $this->Html->link('<i class="fa fa-check"></i> '.__('Mark Completed'), array('action' => 'update', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-warning btn-label btn-updatejob', 'data-type' => 'completed', 'escape' => false));?>
+        <?php } else ?>
+        <?php if (!empty($this->data['Job']['onscene']) && !empty($this->data['Job']['backon']) && !empty($this->data['Job']['completed'])) { ?>
+        <?php echo $this->Html->link('<i class="fa fa-stop-circle"></i> '.__('Job Completed'), array('action' => 'view', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-default btn-label disabled', 'escape' => false));?>
+        <?php } ?>
+    </div>
+</div>
+<?php echo $this->end();?>
 <div class="row">
     <?php echo $this->Form->create('Job', array('class' => 'wizard form-horizontal'));?>
-	<div class="col-xs-12 col-lg-7">
+	<div class="col-xs-12">
 		<div class="panel panel-midnightblue">
 			<div class="panel-heading">
 				<h4><i class="fa fa-cogs"></i> <?php echo __('Job Details', true);?></h4>
@@ -21,88 +39,115 @@
                         <span class="badge badge-danger"><?php echo __('Overdue');?></span>
                     <?php } ?>
                 </legend>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Job Title');?></span>
+                <div class="row">
                     <div class="col-md-6">
-                        <span class="form-control"><?php echo $this->data['Job']['title'];?></span>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Job Title');?></span>
+                            <div class="col-md-6">
+                                <span class="form-control"><?php echo $this->data['Job']['title'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Client Reference');?></span>
+                            <div class="col-md-6">
+                                <span class="form-control"><?php echo $this->data['Job']['reference'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><strong><?php echo __('Due By');?></strong></span>
+                            <div class="col-md-6">
+                                <span class="label label-warning label-lg">
+                                    <?php echo date('l jS F Y', strtotime($this->data['Job']['dueby']));?>
+                                </span>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Customer');?></span>
+                            <div class="col-md-6">
+                                <span class="form-control"><?php echo $this->data['Job']['customer'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Property Name');?></span>
+                            <div class="col-md-6">
+                                <span class="form-control"><?php echo $this->data['Job']['property'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Unit Number');?></span>
+                            <div class="col-md-2">
+                                <span class="form-control"><?php echo $this->data['Job']['unit'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-3 col-xs-2 control-label"><?php echo __('From');?></span>
+                            <div class="col-md-2 col-xs-4">
+                                <span class="form-control"><?php echo $this->data['Job']['address_from'];?></span>
+                            </div>
+                            <span class="col-md-1 col-xs-2 control-label"><?php echo __('To');?></span>
+                            <div class="col-md-2 col-xs-4">
+                                <span class="form-control"><?php echo $this->data['Job']['address_to'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Street');?></span>
+                            <div class="col-md-6">
+                                <span class="form-control"><?php echo $this->data['Job']['address_street'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Suburb / Postcode');?></span>
+                            <div class="col-md-6">
+                                <span class="form-control"><?php echo $this->data['Job']['suburb'];?></span>
+                            </div>
+                        </div>
+                        
+                        <hr/>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Job Description');?></span>
+                            <div class="col-md-6">
+                                <?php echo $this->data['Job']['description'];?>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Client Reference');?></span>
-                    <div class="col-md-6">
-                        <span class="form-control"><?php echo $this->data['Job']['reference'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><strong><?php echo __('Due By');?></strong></span>
-                    <div class="col-md-6">
-                        <span class="label label-warning label-lg">
-                            <?php echo date('l jS F Y', strtotime($this->data['Job']['dueby']));?>
-                        </span>
-                    </div>
-                </div>
-                <hr/>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Customer');?></span>
-                    <div class="col-md-6">
-                        <span class="form-control"><?php echo $this->data['Job']['customer'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Property Name');?></span>
-                    <div class="col-md-6">
-                        <span class="form-control"><?php echo $this->data['Job']['property'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Unit Number');?></span>
-                    <div class="col-md-2">
-                        <span class="form-control"><?php echo $this->data['Job']['unit'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 col-xs-2 control-label"><?php echo __('From');?></span>
-                    <div class="col-md-2 col-xs-4">
-                        <span class="form-control"><?php echo $this->data['Job']['address_from'];?></span>
-                    </div>
-                    <span class="col-md-1 col-xs-2 control-label"><?php echo __('To');?></span>
-                    <div class="col-md-2 col-xs-4">
-                        <span class="form-control"><?php echo $this->data['Job']['address_to'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Street');?></span>
-                    <div class="col-md-6">
-                        <span class="form-control"><?php echo $this->data['Job']['address_street'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Suburb / Postcode');?></span>
-                    <div class="col-md-6">
-                        <span class="form-control"><?php echo $this->data['Job']['suburb'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Contact');?></span>
-                    <div class="col-md-3">
-                        <span class="form-control"><?php echo $this->data['Job']['contact_name'];?></span>
-                    </div>
-                    <span class="col-md-2 control-label"><?php echo __('Ph');?></span>
-                    <div class="col-md-3">
-                        <span class="form-control"><?php echo $this->data['Job']['contact_phone'];?></span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Email');?></span>
-                    <div class="col-md-6">
-                        <span class="form-control"><?php echo $this->data['Job']['contact_email'];?></span>
-                    </div>
-                </div>
-                <hr/>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Job Description');?></span>
-                    <div class="col-md-6">
-                        <?php echo $this->data['Job']['description'];?>
+                    <div class="col-md-5 col-md-offset-1">
+                        <div class="form-group">
+                            <span class="col-md-2 control-label"><?php echo __('Contact');?></span>
+                            <div class="col-md-3">
+                                <span class="form-control"><?php echo $this->data['Job']['contact_name'];?></span>
+                            </div>
+                            <span class="col-md-2 control-label"><?php echo __('Ph');?></span>
+                            <div class="col-md-3">
+                                <span class="form-control"><?php echo $this->data['Job']['contact_phone'];?></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="col-md-2 control-label"><?php echo __('Email');?></span>
+                            <div class="col-md-6">
+                                <span class="form-control"><?php echo $this->data['Job']['contact_email'];?></span>
+                            </div>
+                        </div>
+                        <div class="well">
+                        <?php echo $this->Form->input('signoff_name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Contact Name')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group'));?>  
+                        <?php echo $this->Form->hidden('signoff_sig');?>
+                            <div class="form-group">
+                                <span class="col-md-2 control-label"><?php echo __('Signature');?></span>
+                                <div class="col-xs-12 col-md-10">
+                                    <span class="form-control sig-wrapper">
+                                        <?php if (!empty($this->data['Job']['signoff_sig'])) { ?>
+                                        <img src="<?php echo $this->data['Job']['signoff_sig'];?>" alt="" class="img-responsive"/>
+                                        <?php } ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <span class="col-md-2 control-label"></span>
+                                <div class="col-md-6">
+                                    <?php echo $this->Html->link('<i class="fa fa-pencil"></i> '.__('Capture Signature'), '#', array('class' => 'btn btn-lg btn-inverse btn-label btn-signature', 'escape' => false));?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 			</div>
@@ -118,67 +163,6 @@
             </div>
 		</div>
 	</div>
-
-    <div class="col-xs-12 col-md-6 col-lg-5">
-        <div class="panel panel-midnightblue">
-            <div class="panel-heading">
-                <h4><i class="fa fa-cog"></i> <?php echo __('', true);?></h4>
-                <div class="options">
-                    <a class="panel-collapse" href="javascript:;"><i class="fa fa-chevron-down"></i></a>
-                </div>
-            </div>
-            <div class="panel-body taskings">
-                <div class="form-group">
-                    <span class="col-md-2 control-label"></span>
-                    <div class="col-md-6">
-                        <?php if (empty($this->data['Job']['onscene']) && empty($this->data['Job']['backon']) && empty($this->data['Job']['completed'])) { ?>
-                        <?php echo $this->Html->link('<i class="fa fa-download"></i> '.__('On Scene'), array('action' => 'update', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-primary btn-label btn-updatejob', 'data-type' => 'onscene', 'escape' => false));?>
-                        <?php } else ?>
-                        <?php if (!empty($this->data['Job']['onscene']) && empty($this->data['Job']['backon']) && empty($this->data['Job']['completed'])) { ?>
-                        <?php echo $this->Html->link('<i class="fa fa-upload"></i> '.__('Back On'), array('action' => 'update', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-success btn-label btn-updatejob', 'data-type' => 'backon', 'escape' => false));?>
-                        <?php } else ?>
-                        <?php if (!empty($this->data['Job']['onscene']) && !empty($this->data['Job']['backon']) && empty($this->data['Job']['completed'])) { ?>
-                        <?php echo $this->Html->link('<i class="fa fa-check"></i> '.__('Mark Completed'), array('action' => 'update', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-warning btn-label btn-updatejob', 'data-type' => 'completed', 'escape' => false));?>
-                        <?php } else ?>
-                        <?php if (!empty($this->data['Job']['onscene']) && !empty($this->data['Job']['backon']) && !empty($this->data['Job']['completed'])) { ?>
-                        <?php echo $this->Html->link('<i class="fa fa-stop-circle"></i> '.__('Job Completed'), array('action' => 'view', $this->data['Job']['id']), array('class' => 'btn btn-lg btn-default btn-label disabled', 'escape' => false));?>
-                        <?php } ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xs-12 col-md-6 col-lg-5">
-        <div class="panel panel-orange">
-            <div class="panel-heading">
-                <h4><i class="fa fa-pencil"></i> <?php echo __('Client Signature', true);?></h4>
-                <div class="options">
-                    <a class="panel-collapse" href="javascript:;"><i class="fa fa-chevron-down"></i></a>
-                </div>
-            </div>
-            <div class="panel-body">
-                <?php echo $this->Form->input('signoff_name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Name')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group'));?>  
-                <?php echo $this->Form->hidden('signoff_sig');?>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Signature');?></span>
-                    <div class="col-xs-12 col-md-10">
-                        <span class="form-control sig-wrapper">
-                            <?php if (!empty($this->data['Job']['signoff_sig'])) { ?>
-                            <img src="<?php echo $this->data['Job']['signoff_sig'];?>" alt="" class="img-responsive"/>
-                            <?php } ?>
-                        </span>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"></span>
-                    <div class="col-md-6">
-                        <?php echo $this->Html->link('<i class="fa fa-pencil"></i> '.__('Client Signature'), '#', array('class' => 'btn btn-lg btn-default btn-label btn-signature', 'escape' => false));?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div class="col-xs-12">
         <div class="panel panel-success">

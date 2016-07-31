@@ -48,9 +48,10 @@ class QuotesController extends AppController {
  * @return array  (Variable sent to the view will always be called data just to make things easier)
  */
 	public function index() {
-		$this->paginte = $this->Quote->conditions();
+		$resp = $this->Quote->getQuotes();
+		$this->paginate = $resp['paginate'];
 		$this->set('data', $this->paginate());
-		$this->render($this->paginte['template']);
+		$this->render($resp['template']);
 	}
 
 /**
@@ -68,7 +69,7 @@ class QuotesController extends AppController {
 		if (!$this->request->is('ajax')) {
 			$this->joblog($this->Quote->id, __('Quote viewed by user %s', $this->Session->read('Auth.User.id')));
 		}
-		$this->data = $this->Quote->find('first', $this->Quote->conditions(array('Quote.id' => $id)));
+		$this->data = $this->Quote->findQuote($id);
 		$this->set('title_for_layout', __('View Quote').sprintf(' %s', $this->data['Quote']['id']));
 	}
 
@@ -103,9 +104,8 @@ class QuotesController extends AppController {
 				$continue = $this->add_validate_location();
 			}
 			if ($continue) {
-				$this->Quote->set($this->request->data['Quote']);
-				if ($this->Quote->save($this->request->data)) {
-					$this->Quote->updateTax($this->request->data);
+				if ($this->Quote->save()) {
+					$this->Quote->updateTax($this->Quote->id, $this->request->data);
 					$this->Quote->QuoteItem->updateTotal($this->Quote->id);
 					$this->joblog($this->Quote->id, __('Quote created'));
 					$this->Flash->success(__('Quote updated.'));
@@ -163,7 +163,7 @@ class QuotesController extends AppController {
 			}
 		}
 
-		$this->data = $this->Quote->find('first', $this->Quote->conditions(array('Quote.id' => $id)));
+		$this->data = $this->Quote->findQuote($id);
 		$this->render('view');
 	}
 
@@ -182,7 +182,7 @@ class QuotesController extends AppController {
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			if ($this->Quote->saveAll($this->request->data)) {
-				$this->Quote->updateTax($this->request->data);
+				$this->Quote->updateTax($this->Quote->id, $this->request->data);
 				$this->Quote->QuoteItem->updateTotal($this->Quote->id);
 				$this->joblog($this->Quote->id, __('Quote edited by user %s', $this->Session->read('Auth.User.id')));
 				$this->Flash->success(__('Quote updated.'));
@@ -191,7 +191,7 @@ class QuotesController extends AppController {
 				$this->Flash->error(__('Please fix any errors before continuing.'));
 			}
 		}
-		$this->data = $this->Quote->find('first', $this->Quote->conditions(array('Quote.id' => $id)));
+		$this->data = $this->Quote->findQuote($id);
 		$this->Quote->User->virtualFields = array('fullname' => 'CONCAT(firstname, " ", lastname)');
 		$this->set('users', $this->Quote->User->find('list', array('fields' => array('id', 'fullname'), 'conditions' => array('User.client_id' => $this->Session->read('Auth.User.client_id')))));
 		$this->loadModel('Tax');
@@ -212,7 +212,7 @@ class QuotesController extends AppController {
 			throw new NotFoundException(__('Invalid job id'));
 		}
 		$this->Quote->unBindModel(array('hasMany' => array('QuoteLog')));
-		$data = $this->Quote->read(null, $id);
+		$data = $this->Quote->findQuote($id);
 		if ($this->Quote->delete($id, true)) {
 			$this->joblog($id, __('Quote deleted by user %s', $this->Session->read('Auth.User.id')), json_encode($data));
 			$this->Flash->success(__('Quote deleted'));
@@ -275,7 +275,7 @@ class QuotesController extends AppController {
 		if (!$this->Quote->exists()) {
 			throw new NotFoundException(__('Invalid job id'));
 		}
-		if ($job_id = $this->Quote->convertInvoice($id)) {
+		if ($job_id = $this->Quote->convertToJob($id)) {
 			$this->joblog($id, __('Quote %s converted to job by user %s', $id, $this->Session->read('Auth.User.id')));
 			$this->Flash->success(__('Quote converted to job'));
 			$this->redirect(array('controller' => 'jobs', 'action' => 'edit', $job_id));
@@ -319,7 +319,7 @@ class QuotesController extends AppController {
 		if (!$this->Quote->exists()) {
 			throw new NotFoundException(__('Invalid job id'));
 		}
-		$quote = $this->Quote->read(null, $id);
+		$quote = $this->Quote->findQuote($id);
 		$this->set(compact('quote'));
 		if ($this->request->is('post') && $this->request->is('ajax')) {
 			$this->autoRender = false;

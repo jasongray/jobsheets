@@ -6,7 +6,7 @@
 		<div class="col-sm-12">
 			<div class="input-group">
 				<span class="input-group-addon"><i class="fa fa-user"></i></span>
-				<?php echo $this->Form->input('email', array('div' => false, 'label' => false, 'class' => 'form-control', 'placeholder' => __('Username / Email'), 'autofocus' => 'autofocus'));?>
+				<?php echo $this->Form->input('email', array('div' => false, 'label' => false, 'class' => 'form-control', 'placeholder' => __('Username / Email'), 'autofocus' => 'autofocus', 'data-type' => 'email'));?>
 	    	</div>
 	    </div>
 	</div>
@@ -18,10 +18,15 @@
 	    	</div>
 	    </div>
 	</div>
+	<div class="clearfix">
+		<div class="pull-right">
+			<?php echo $this->Html->link(__('Forgot Password?'), array('controller' => 'users', 'action' => 'forgot'), array('escape' => false));?>	
+		</div>
+	</div>
 </div>
 <div class="panel-footer">
 	<div class="pull-left">
-		<?php echo $this->Html->link(__('Register'), array('controller' => 'users', 'action' => 'register'), array('class' => 'btn btn-default', 'escape' => false));?>
+		<?php echo $this->Html->link(__('Register'), array('controller' => 'users', 'action' => 'register'), array('class' => 'btn btn-success', 'escape' => false));?>
 	</div>
 	<div class="pull-right">
     	<?php echo $this->Form->button(__('Log In'), array('class' => 'btn btn-primary', 'escape' => false));?>

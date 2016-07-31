@@ -1,0 +1,1 @@
+<img src="<?php echo $this->Captcha->image(false);?>" id="captcha-image" />

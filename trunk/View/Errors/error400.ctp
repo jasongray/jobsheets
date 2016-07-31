@@ -14,6 +14,7 @@
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 ?>
+<?php if (!$this->Session->check('Auth.User.id')) { $this->layout = 'login'; }?>
 				<div class="col-md-12">
 					<p class="text-center">
 						<span class="text-info" style="font-size:4em;"><?php echo __('Uh-oh');?></span>

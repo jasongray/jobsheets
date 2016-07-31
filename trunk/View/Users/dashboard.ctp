@@ -4,11 +4,13 @@
 <?php echo $this->Html->css(array('datatables', 'fullcalendar'), array('inline' => false));?>
 
 <?php echo $this->start('heading');?>
+<?php if ($this->Session->read('Auth.User.role_id') < 3) { ?>
 <div class="options">
     <div class="btn-toolbar">
         <?php echo $this->Html->link('<i class="fa fa-cogs"></i> ' . __('My Account'), array('controller' => 'clients', 'action' => 'account'), array('class' => 'btn btn-inverse', 'escape' => false));?>
     </div>
 </div>
+<?php } ?>
 <?php echo $this->end();?>
 
 <?php echo $this->start('rightbar');?>

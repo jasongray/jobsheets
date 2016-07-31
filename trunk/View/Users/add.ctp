@@ -2,7 +2,7 @@
 <?php $this->Html->pageTitle = __('Manage Users');?>
 <?php $this->Html->addCrumb(__('Users'), array('controller' => 'users', 'action' => 'index'));?>
 <?php $this->Html->addCrumb(__('Add User'));?>
-<?php echo $this->Form->create('User');?>
+<?php echo $this->Form->create('User', array('type' => 'file'));?>
 <div class="row">
 	<div class="col-md-6">
 		<div class="panel panel-midnightblue">

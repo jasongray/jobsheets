@@ -4515,6 +4515,12 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .input-group .form-control {
   display: table-cell;
 }
+.input-group-addon.umsg {
+  position: absolute;
+  top: 1;
+  right: 1;
+  border: none;
+}
 .input-group-addon:not(:first-child):not(:last-child),
 .input-group-btn:not(:first-child):not(:last-child),
 .input-group .form-control:not(:first-child):not(:last-child) {

@@ -81,8 +81,8 @@ class JobsController extends AppController {
 		} else {
 			$status = false;
 		}
-		$resp = $this->Job->getJobs($status);
-		$this->paginate = $resp['out'];
+		$resp = $this->Job->getJobs(array(), 25, array(), false, $status);
+		$this->paginate = $resp['paginate'];
 		$this->set('data', $this->paginate());
 		$this->set('class_status', $resp['class_status']);
 		$this->render($resp['template']);
@@ -96,8 +96,8 @@ class JobsController extends AppController {
  * @return array  (Variable sent to the view will always be called data just to make things easier)
  */
 	public function profile() {
-		$resp = $this->Job->getJobs(false, true);
-		$this->paginate = $resp['out'];
+		$resp = $this->Job->getJobs(array(), 25, array(), false, false, true);
+		$this->paginate = $resp['paginate'];
 		$this->set('data', $this->paginate());
 	}
 
@@ -116,7 +116,7 @@ class JobsController extends AppController {
 		if (!$this->request->is('ajax')) {
 			$this->joblog($this->Job->id, __('Job viewed by user %s', $this->Session->read('Auth.User.id')));
 		}
-		$this->data = $this->Job->find('first', array('conditions' => array('Job.client_id' => $this->Session->read('Auth.User.client_id'), 'Job.client_meta' => $this->Session->read('Auth.User.client_meta'), 'Job.id' => $id)));
+		$this->data = $this->Job->findJob($id);
 	}
 
 /**
@@ -150,7 +150,6 @@ class JobsController extends AppController {
 				$continue = $this->add_validate_location();
 			}
 			if ($continue) {
-				$this->Job->set($this->request->data['Job']);
 				if ($this->Job->save($this->request->data)) {
 					$this->joblog($this->Job->id, __('Job created'));
 					$this->Flash->success(__('Location created and Job updated.'));
@@ -205,7 +204,7 @@ class JobsController extends AppController {
 			}
 		}
 
-		$this->data = $this->Job->find('first', array('conditions' > array('Job.client_id' => $this->Session->read('Auth.User.client_id'), 'Job.client_meta' => $this->Session->read('Auth.User.client_meta'), 'Job.id' => $id)));
+		$this->data = $this->Job->findJob($id);
 		$this->render('view');
 	}
 
@@ -232,7 +231,7 @@ class JobsController extends AppController {
 				$this->Flash->error(__('Please fix any errors before continuing.'));
 			}
 		}
-		$this->data = $this->Job->find('first', array('conditions' => array('Job.client_id' => $this->Session->read('Auth.User.client_id'), 'Job.client_meta' => $this->Session->read('Auth.User.client_meta'), 'Job.id' => $id)));
+		$this->data = $this->Job->findJob($id);
 		$this->Job->User->virtualFields = array('fullname' => 'CONCAT(firstname, " ", lastname)');
 		$this->set('users', $this->Job->User->find('list', array('fields' => array('id', 'fullname'), 'conditions' => array('User.client_id' => $this->Session->read('Auth.User.client_id')))));
 	}
@@ -250,7 +249,7 @@ class JobsController extends AppController {
 			throw new NotFoundException(__('Invalid job id'));
 		}
 		$this->Job->unBindModel(array('hasMany' => array('JobLog')));
-		$data = $this->Job->read(null, $id);
+		$data = $this->Job->findJob($id);
 		if ($this->Job->delete($id, true)) {
 			$this->joblog($id, __('Job deleted by user %s', $this->Session->read('Auth.User.id')), json_encode($data));
 			$this->Flash->success(__('Job deleted'));

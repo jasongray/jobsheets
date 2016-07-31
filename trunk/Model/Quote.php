@@ -134,68 +134,128 @@ class Quote extends AppModel {
 	}
 
 /**
- * Get quotes for specified user conditions.
+ * Get the outstanding quotes for the current user
  *
- * @param array $conditions
  * @return array
  */
-	public function conditions($conditions = array(), $limit = 25, $order = array()){
+	public function outstanding() {
+		$this->recursive = 0;
+		$this->virtualFields = array('cnt' => 'COUNT(DISTINCT(Quote.id))');
+		$data = $this->find('first', array(
+			'fields' => array(
+				'Quote.cnt',
+			),
+			'conditions' => array( 
+				'Quote.status <' => 9,
+				'Quote.client_id' => CakeSession::read('Auth.User.client_id'),
+				'Quote.client_meta' => CakeSession::read('Auth.User.client_meta'),
+			),
+		));
+		if ($data) {
+			return array('count' => $data['Quote']['cnt']);
+		} else {
+			return array('count' => 0);
+		}
+	}
+
+
+/**
+ * Find jobs from the database
+ *
+ * @param string $type - the type of find, 'all', 'first', 'list' etc
+ * @return array
+ */
+	public function findQuotes($type = 'all') {
+		$cond = $this->getQuotes();
+		return $this->find($type, $cond['paginate']);
+	}
+
+/**
+ * Find job from the database
+ *
+ * @param string $id - the job id
+ * @return array
+ */
+	public function findQuote($id = false) {
+		if (!$id) return;
+		$cond = $this->getQuotes(array('Quote.id' => $id));
+		$this->bindModel(array('hasMany' => array('QuoteItem')), false);
+		return $this->find('first', $cond['paginate']);
+	}
+
+/**
+ * Get jobs for the index view
+ *
+ * @param string $status
+ * @param bool $role - Override role and return user jobs only
+ * @return array
+ */
+	public function getQuotes($conditions = array(), $limit = 25, $order = array(), $joins = false, $status = null) {
 		$this->recursive = 2;
 
 		$this->unBindModel(array('hasMany' => array('QuoteItem')), false);
 		$this->Client->unBindModel(array('hasMany' => array('User')), false);
 		$this->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
 		
-		$user = CakeSession::read('Auth.User.id');
-		$client = CakeSession::read('Auth.User.client_id');
-		$meta = CakeSession::read('Auth.User.client_meta');
 		$role = CakeSession::read('Auth.User.role_id');
-		$template = CakeSession::read('Auth.User.Client.template');
+		$template = CakeSession::read('Auth.Client.template');
+		$client_id = CakeSession::read('Auth.User.client_id');
+		$client_meta = CakeSession::read('Auth.User.client_meta');
+
+		$QuoteStatus = array('Quote.status <' => 8);
+		$class_status = 'default';
+
+		if (isset($status) && !empty($status)) {
+			if ($status == 'completed') {
+				$QuoteStatus = array('Quote.status' => 8);
+			}
+			if ($status == 'cancelled') {
+				$QuoteStatus = array('Quote.status' => 9);
+			}
+			$class_status = $status;
+		} 
 
 		switch ($role) {
 			case 1:
-				$order = array_merge(
-					array(
-						'Quote.client_id ASC',
-						'Quote.id DESC'
-					)
+				$paginate = array(
+					'conditions' => 
+						$conditions
+					, 
+					'limit' => 25, 
+					'order' => array('Quote.client_id ASC', 'Quote.id DESC')
 				);
 				$template = 'admin_index';
 				break;
 			case 2:
 			case 3:
-				$conditions = array_merge($conditions, 
-					array(
-						'Quote.client_id' => $client,
-						'Quote.client_meta' => $meta,
-					)
-				);
-				$order = array_merge($order, 
-					array(
-						'Quote.created ASC, Quote.status ASC'
-					)
+				$paginate = array(
+					'conditions' => array_merge(array(
+						'Quote.client_id' => $client_id,
+						'Quote.client_meta' => $client_meta,
+						), $QuoteStatus, $conditions
+					),
+					'limit' => 25, 
+					'order' => array('Quote.created ASC, Quote.status ASC'),
 				);
 				$template = 'index';
 				break;
 			case 4:
 			default:
-				$conditions = array_merge($conditions,
-					array(
-						'Quote.user_id' => $user,
-						'Quote.client_id' => $client,
-						'Quote.client_meta' => $meta,
-					)
-				);
-				$order = array_merge($order, 
-					array(
-						'Quote.status ASC, Quote.created ASC'
-					)
+				$paginate = array(
+					'conditions' => array_merge(array(
+						'Quote.user_id' => CakeSession::read('Auth.User.id'),
+						'Quote.client_id' => $client_id,
+						'Quote.client_meta' => $client_meta,
+						), $JobStatus, $conditions
+					),
+					'limit' => 25, 
+					'order' => array('Quote.status ASC, Quote.created ASC'),
 				);
 				$template = 'index_user';
 				break;
 		}
-		
-		return array('conditions' => $conditions, 'limit' => $limit, 'order' => $order, 'template' => $template);
+		return compact('paginate', 'template', 'class_status');
+
 	}
 
 /**
@@ -278,13 +338,13 @@ class Quote extends AppModel {
  * @param $data Array 
  * @return void
  */
-	public function updateTax($data = array()) {
+	public function updateTax($id = false, $data = array()) {
 		if (!empty($data) && !empty($data['Quote']['tax_id'])) {
 			App::uses('Tax', 'Model');
 			$this->Tax = new Tax();
 			$t = $this->Tax->read(null, $data['Quote']['tax_id']);
 			if (!empty($t)) {
-				$this->id = $data['Quote']['id'];
+				$this->id = $id;
 				$this->saveField('tax_rate', $t['Tax']['rate']);
 				$this->saveField('tax_name', $t['Tax']['name']);
 			}
@@ -298,7 +358,7 @@ class Quote extends AppModel {
  * @param $id integer The quote ID
  * @return bool
  */
-	public function convertInvoice($quote_id = null) {
+	public function convertToJob($quote_id = null) {
 		if ($quote_id) {
 			$this->id = $quote_id;
 			if ($this->exists()) {

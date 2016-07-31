@@ -4,10 +4,29 @@
 <?php $this->Html->addCrumb(__('Job List'), array('controller' => 'jobs', 'action' => 'index'));?>
 <?php $this->Html->addCrumb(__('Edit Job ') . $this->data['Job']['id']);?>
 <?php echo $this->Html->css(array('datatables', 'plugins/jquery-ui', 'plugins/timepicker', 'plugins/signature-pad'), array('block' => 'css'));?>
+<?php echo $this->start('heading');?>
+<?php if ($this->data['Job']['status'] > 7) { ?>
+<div class="options">
+    <div class="btn-toolbar">
+        <?php echo $this->Html->link('<i class="fa fa-history"></i> '.__('Reallocate'), array('action' => 'reallocate', $this->data['Job']['id']), array('class' => 'btn btn-primary btn-label', 'escape' => false));?>
+        <?php if (empty($this->data['Job']['invoice_date']) && empty($this->data['Job']['invoice_id'])) { ?>
+        <?php echo $this->Html->link('<i class="fa fa-sign-out"></i> '.__('Create Invoice'), array('action' => 'invoice', $this->data['Job']['id']), array('class' => 'btn btn-default btn-label', 'escape' => false));?>
+        <?php } else { ?>
+        <div class="form-group">
+            <span class="col-md-2 control-label"><?php echo __('Invoice');?></span>
+            <div class="col-md-6">
+                <?php echo $this->Html->link($this->data['Job']['invoice_id'], array('controller' => 'invoices', 'action' => 'view', $this->data['Job']['invoice_id']));?><span class="help-text"><?php echo __('Created');?> :: <?php echo date('d M Y', strtotime($this->data['Job']['invoice_date']));?></span>
+            </div>
+        </div>
+        <?php } ?>
+    </div>
+</div>
+<?php } ?>
+<?php echo $this->end();?>
 <div class="row">
     <?php echo $this->Form->create('Job', array('class' => 'wizard form-horizontal'));?>
-	<div class="col-xs-12 col-lg-7">
-		<div class="panel panel-midnightblue">
+	<div class="col-xs-12">
+		<div class="panel panel-orange">
 			<div class="panel-heading">
 				<h4><i class="fa fa-cogs"></i> <?php echo __('Edit Job', true);?></h4>
                 <div class="options">
@@ -16,112 +35,73 @@
 			</div>
 			<div class="panel-body">
                 <legend><?php echo __(sprintf('J%s', $this->data['Job']['id']));?></legend>
-                <?php echo $this->Form->input('title', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Job Title')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
-				<?php echo $this->Form->input('reference', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Client Reference')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
-                <?php echo $this->Form->input('customer', array('class' => 'form-control typeahead', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Customer')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group', 'data-provide' => 'typeahead', 'data-url' => $this->Html->url(array('controller' => 'customers', 'action' => 'get')), 'autocomplete' => 'off', 'type' => 'text'));?>
-                <?php echo $this->Form->hidden('customer_id');?>
-				<?php echo $this->Form->input('property', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Property Name')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
-                <?php echo $this->Form->input('unit', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Unit Number')), 'between' => '<div class="col-md-2">', 'after' => '</div>', 'div' => 'form-group'));?>
-                <div class="form-group">
-                    <?php echo $this->Form->input('address_from', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 col-xs-2 control-label', 'text' => __('From')), 'between' => '<div class="col-md-2 col-xs-4">', 'after' => '</div>', 'div' => false));?>
-                    <?php echo $this->Form->input('address_to', array('class' => 'form-control', 'label' => array('class' => 'col-md-1 col-xs-2 control-label', 'text' => __('To')), 'between' => '<div class="col-md-2 col-xs-4">', 'after' => '</div>', 'div' => false));?>
+                <div class="row">
+                    <div class="col-md-6">
+                        <?php echo $this->Form->input('title', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Job Title')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+        				<?php echo $this->Form->input('reference', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Client Reference')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <?php echo $this->Form->input('customer', array('class' => 'form-control typeahead', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Customer')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group', 'data-provide' => 'typeahead', 'data-url' => $this->Html->url(array('controller' => 'customers', 'action' => 'get')), 'autocomplete' => 'off', 'type' => 'text'));?>
+                        <?php echo $this->Form->hidden('customer_id');?>
+                        <hr/>
+        				<?php echo $this->Form->input('property', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Property Name')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <?php echo $this->Form->input('unit', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Unit Number')), 'between' => '<div class="col-md-2">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <div class="form-group">
+                            <?php echo $this->Form->input('address_from', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 col-xs-2 control-label', 'text' => __('From')), 'between' => '<div class="col-md-2 col-xs-4">', 'after' => '</div>', 'div' => false));?>
+                            <?php echo $this->Form->input('address_to', array('class' => 'form-control', 'label' => array('class' => 'col-md-1 col-xs-2 control-label', 'text' => __('To')), 'between' => '<div class="col-md-2 col-xs-4">', 'after' => '</div>', 'div' => false));?>
+                        </div>
+                        <?php echo $this->Form->input('address_street', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Street')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <?php echo $this->Form->input('suburb', array('class' => 'form-control typeahead', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Suburb / Postcode')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group', 'data-provide' => 'typeahead', 'data-url' => $this->Html->url(array('controller' => 'postcodes', 'action' => 'get')), 'autocomplete' => 'off'));?>
+                        <?php echo $this->Form->hidden('postcode_id');?>
+                        <?php echo $this->Form->input('contact_name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Contact')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <?php echo $this->Form->input('contact_phone', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Phone')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+                        <?php echo $this->Form->input('contact_email', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Email')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+                    </div>
+                    <div class="col-md-6">
+                        <?php echo $this->Form->input('user_id', array('class' => 'form-control', 'label' => array('class' => 'col-md-3 control-label', 'text' => __('Allocate Job to')), 'between' => '<div class="col-md-7">', 'after' => '</div>', 'div' => 'form-group', 'multiple'));?>
+                        <?php echo $this->Form->input('allocated', array('div' => 'form-group', 'class' => 'form-control datetimepicker', 'label' => array('text' => __('Allocated date'), 'class' => 'col-md-3 control-label'), 'between' => '<div class="col-md-7"><div class="input-group date">', 'after' => '<span class="input-group-addon"><i class="fa fa-calendar"></i></span></div></div>', 'type' => 'text'));?>
+                        <?php echo $this->Form->input('dueby', array('div' => 'form-group', 'class' => 'form-control datetimepicker', 'label' => array('text' => __('Due by date'), 'class' => 'col-md-3 control-label'), 'between' => '<div class="col-md-7"><div class="input-group date">', 'after' => '<span class="input-group-addon"><i class="fa fa-calendar"></i></span></div></div>', 'type' => 'text'));?>
+                        <?php echo $this->Form->input('notes', array('class' => 'form-control', 'label' => array('class' => 'col-md-3 control-label', 'text' => __('Job Notes')), 'between' => '<div class="col-md-7">', 'after' => '</div>', 'div' => 'form-group', 'rows' => 8));?>
+                        <?php echo $this->Form->input('status', array('class' => 'form-control', 'label' => array('class' => 'col-md-3 control-label', 'text' => __('Job Status')), 'between' => '<div class="col-md-7">', 'after' => '</div>', 'div' => 'form-group', 'empty' => '', 'options' => array(__('Unallocated'), __('Allocated'), __('Tasked'), __('Draft'), 8 => __('Completed'), 9 => __('Cancelled'))));?>
+                        <hr/>
+                        <?php if (!empty($this->data['Job']['signoff_sig'])) { ?>
+                        <?php echo $this->Form->input('signoff_name', array('class' => 'form-control', 'label' => array('class' => 'col-md-3 control-label', 'text' => __('Name')), 'between' => '<div class="col-md-7">', 'after' => '</div>', 'div' => 'form-group'));?>  
+                        <?php echo $this->Form->hidden('signoff_sig');?>
+                        <div class="form-group">
+                            <span class="col-md-3 control-label"><?php echo __('Signature');?></span>
+                            <div class="col-md-7">
+                                <span class="form-control sig-wrapper">
+                                    <img src="<?php echo $this->data['Job']['signoff_sig'];?>" alt="" class="img-responsive"/>
+                                </span>
+                            </div>
+                        </div>
+                        <?php } ?>
+                    </div>
                 </div>
-                <?php echo $this->Form->input('address_street', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Street')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
-                <?php echo $this->Form->input('suburb', array('class' => 'form-control typeahead', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Suburb / Postcode')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group', 'data-provide' => 'typeahead', 'data-url' => $this->Html->url(array('controller' => 'postcodes', 'action' => 'get')), 'autocomplete' => 'off'));?>
-                <?php echo $this->Form->hidden('postcode_id');?>
-                <?php echo $this->Form->input('contact_name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Contact')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
-                <?php echo $this->Form->input('contact_phone', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Phone')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
-                <?php echo $this->Form->input('contact_email', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Email')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
-
-                <?php echo $this->Form->input('description', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Job Description')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group', 'type' => 'textarea', 'class' => 'form-control wysiwyg', 'rows' => 15));?>
-				
+                <div class="row">
+                    <div class="col-md-12">
+                        <?php echo $this->Form->input('description', array('class' => 'form-control', 'label' => array('class' => 'col-md-1 control-label', 'text' => __('Job Description')), 'between' => '<div class="col-md-11">', 'after' => '</div>', 'div' => 'form-group', 'type' => 'textarea', 'class' => 'form-control wysiwyg', 'rows' => 15));?>
+                    </div>
+				</div>
 			</div>
             <div class="panel-footer">
                 <div class="row">
-                    <div class="col-sm-6 col-sm-offset-2">
+                    <div class="col-sm-6 col-sm-offset-1">
                         <div class="btn-toolbar">
                             <?php echo $this->Form->hidden('id');?>
                             <?php echo $this->Form->submit(__('Save'), array('div' => false, 'class' => 'btn-primary btn'));?>
                             <?php echo $this->Html->link(__('Cancel'), array('action' => 'cancel'), array('class' => 'btn-default btn'));?>
                         </div>
                     </div>
-                    <div class="col-sm-2 col-sm-offset-2">
+                    <div class="col-sm-5">
                         <div class="btn-toolbar">
-                            <?php echo $this->Html->link(__('Delete Job'), array('action' => 'delete', $this->data['Job']['id']), array('class' => 'btn-danger btn'));?>
+                            <?php echo $this->Html->link(__('Delete Job'), array('action' => 'delete', $this->data['Job']['id']), array('class' => 'btn-danger btn pull-right'));?>
                         </div>
                     </div>
                 </div>
             </div>
 		</div>
 	</div>
-    <div class="col-xs-12 col-lg-5">
-        <div class="panel panel-midnightblue">
-            <div class="panel-heading">
-                <h4><i class="fa fa-user"></i> <?php echo __('Allocate Job', true);?></h4>
-                <div class="options">
-                    <a class="panel-collapse" href="javascript:;"><i class="fa fa-chevron-down"></i></a>
-                </div>
-            </div>
-            <div class="panel-body">
-                <?php echo $this->Form->input('user_id', array('class' => 'form-control', 'label' => array('class' => 'col-md-3 control-label', 'text' => __('Allocate Job to')), 'between' => '<div class="col-md-7">', 'after' => '</div>', 'div' => 'form-group', 'multiple'));?>
-                <?php echo $this->Form->input('allocated', array('div' => 'form-group', 'class' => 'form-control datetimepicker', 'label' => array('text' => __('Allocated date'), 'class' => 'col-md-3 control-label'), 'between' => '<div class="col-md-7"><div class="input-group date">', 'after' => '<span class="input-group-addon"><i class="fa fa-calendar"></i></span></div></div>', 'type' => 'text'));?>
-                <?php echo $this->Form->input('dueby', array('div' => 'form-group', 'class' => 'form-control datetimepicker', 'label' => array('text' => __('Due by date'), 'class' => 'col-md-3 control-label'), 'between' => '<div class="col-md-7"><div class="input-group date">', 'after' => '<span class="input-group-addon"><i class="fa fa-calendar"></i></span></div></div>', 'type' => 'text'));?>
-                <?php echo $this->Form->input('notes', array('class' => 'form-control', 'label' => array('class' => 'col-md-3 control-label', 'text' => __('Job Notes')), 'between' => '<div class="col-md-7">', 'after' => '</div>', 'div' => 'form-group', 'rows' => 8));?>
-                <?php echo $this->Form->input('status', array('class' => 'form-control', 'label' => array('class' => 'col-md-3 control-label', 'text' => __('Job Status')), 'between' => '<div class="col-md-7">', 'after' => '</div>', 'div' => 'form-group', 'empty' => '', 'options' => array(__('Unallocated'), __('Allocated'), __('Tasked'), __('Draft'), 8 => __('Completed'), 9 => __('Cancelled'))));?>
-            </div>
-        </div>
-    </div>
-    <?php if (!empty($this->data['Job']['signoff_sig'])) { ?>
-    <div class="col-xs-12 col-md-6 col-lg-5">
-        <div class="panel panel-grape">
-            <div class="panel-heading">
-                <h4><i class="fa fa-pencil"></i> <?php echo __('Client Signature', true);?></h4>
-                <div class="options">
-                    <a class="panel-collapse" href="javascript:;"><i class="fa fa-chevron-down"></i></a>
-                </div>
-            </div>
-            <div class="panel-body">
-                <?php echo $this->Form->input('signoff_name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Name')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group'));?>  
-                <?php echo $this->Form->hidden('signoff_sig');?>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Signature');?></span>
-                    <div class="col-md-7">
-                        <span class="form-control sig-wrapper">
-                            <img src="<?php echo $this->data['Job']['signoff_sig'];?>" alt="" class="img-responsive"/>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <?php } ?>
-    <?php if ($this->data['Job']['status'] > 7) { ?>
-    <div class="col-xs-12 col-md-6 col-lg-5">
-        <div class="panel panel-grape">
-            <div class="panel-heading">
-                <h4><i class="icon-highlight fa fa-paperclip"></i> <?php echo __('Actions', true);?></h4>
-                <div class="options">
-                    <a class="panel-collapse" href="javascript:;"><i class="fa fa-chevron-down"></i></a>
-                </div>
-            </div>
-            <div class="panel-body taskings">
-                <?php echo $this->Html->link('<i class="fa fa-history"></i> '.__('Reallocate'), array('action' => 'reallocate', $this->data['Job']['id']), array('class' => 'btn btn-xlg btn-primary btn-label', 'escape' => false));?>
-                <?php if (empty($this->data['Job']['invoice_date']) && empty($this->data['Job']['invoice_id'])) { ?>
-                <?php echo $this->Html->link('<i class="fa fa-sign-out"></i> '.__('Create Invoice'), array('action' => 'invoice', $this->data['Job']['id']), array('class' => 'btn btn-xlg btn-default btn-label', 'escape' => false));?>
-                <?php } else { ?>
-                <div class="form-group">
-                    <span class="col-md-2 control-label"><?php echo __('Invoice');?></span>
-                    <div class="col-md-6">
-                        <?php echo $this->Html->link($this->data['Job']['invoice_id'], array('controller' => 'invoices', 'action' => 'view', $this->data['Job']['invoice_id']));?><span class="help-text"><?php echo __('Created');?> :: <?php echo date('d M Y', strtotime($this->data['Job']['invoice_date']));?></span>
-                    </div>
-                </div>
-                <?php } ?>
-            </div>
-        </div>
-    </div>
-    <?php } ?>
     <div class="col-xs-12">
-        <div class="panel panel-midnightblue">
+        <div class="panel panel-orange">
             <div class="panel-heading">
                 <h4><i class="fa fa-wrench"></i> <?php echo __('Job Items', true);?></h4>
                 <div class="options">

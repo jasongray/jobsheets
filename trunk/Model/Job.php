@@ -169,7 +169,7 @@ class Job extends AppModel {
 			    'data' => $this->data
 			));
 		}
-		$this->getEventManager()->attach($event);
+		$this->getEventManager()->dispatch($event);
 	}
 
 
@@ -295,6 +295,54 @@ class Job extends AppModel {
 		));
 	}
 
+/**
+ * Get the current unallocated jobs for the current user
+ *
+ * @return array
+ */
+	public function outstanding() {
+		$this->recursive = 0;
+		$this->virtualFields = array('cnt' => 'COUNT(DISTINCT(Job.id))');
+		$data = $this->find('first', array(
+			'fields' => array(
+				'Job.cnt',
+			),
+			'conditions' => array( 
+				'Job.status' => 0,
+				'Job.client_id' => CakeSession::read('Auth.User.client_id'),
+				'Job.client_meta' => CakeSession::read('Auth.User.client_meta'),
+			),
+		));
+		if ($data) {
+			return array('outstanding' => $data['Job']['cnt']);
+		} else {
+			return array('outstanding' => 0);
+		}
+	}
+
+/**
+ * Find jobs from the database
+ *
+ * @param string $type - the type of find, 'all', 'first', 'list' etc
+ * @return array
+ */
+	public function findJobs($type = 'all') {
+		$cond = $this->getJobs();
+		return $this->find($type, $cond['paginate']);
+	}
+
+/**
+ * Find job from the database
+ *
+ * @param string $id - the job id
+ * @return array
+ */
+	public function findJob($id = false) {
+		if (!$id) return;
+		$cond = $this->getJobs(array('Job.id' => $id));
+		$this->bindModel(array('hasMany' => array('JobItem')), false);
+		return $this->find('first', $cond['paginate']);
+	}
 
 /**
  * Get jobs for the index view
@@ -303,7 +351,7 @@ class Job extends AppModel {
  * @param bool $role - Override role and return user jobs only
  * @return array
  */
-	public function getJobs($status = null, $role = false) {
+	public function getJobs($conditions = array(), $limit = 25, $order = array(), $joins = false, $status = null, $role = false) {
 		$this->recursive = 2;
 		
 		$this->unBindModel(array('hasMany' => array('JobItem')), false);
@@ -311,9 +359,7 @@ class Job extends AppModel {
 		$this->Location->unBindModel(array('hasMany' => array('Job')), false);
 		$this->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
 		
-		if (!$role) {
-			$role = CakeSession::read('Auth.User.role_id');
-		}
+		$role = CakeSession::read('Auth.User.role_id');
 		$template = CakeSession::read('Auth.Client.template');
 		$client_id = CakeSession::read('Auth.User.client_id');
 		$client_meta = CakeSession::read('Auth.User.client_meta');
@@ -333,16 +379,22 @@ class Job extends AppModel {
 
 		switch ($role) {
 			case 1:
-				$out = array('limit' => 25, 'order' => array('Job.client_id ASC', 'Job.id DESC'));
+				$paginate = array(
+					'conditions' => 
+						$conditions
+					,
+					'limit' => 25, 
+					'order' => array('Job.client_id ASC', 'Job.id DESC')
+				);
 				$template = 'admin_index';
 				break;
 			case 2:
 			case 3:
-				$out = array(
+				$paginate = array(
 					'conditions' => array_merge(array(
 						'Job.client_id' => $client_id,
 						'Job.client_meta' => $client_meta,
-						), $JobStatus
+						), $JobStatus, $conditions
 					),
 					'limit' => 25, 
 					'order' => array('Job.created ASC, Job.status ASC'),
@@ -351,12 +403,12 @@ class Job extends AppModel {
 				break;
 			case 4:
 			default:
-				$out = array(
+				$paginate = array(
 					'conditions' => array_merge(array(
 						'Job.user_id' => CakeSession::read('Auth.User.id'),
 						'Job.client_id' => $client_id,
 						'Job.client_meta' => $client_meta,
-						), $JobStatus
+						), $JobStatus, $conditions
 					),
 					'limit' => 25, 
 					'order' => array('Job.status ASC, Job.created ASC'),
@@ -364,7 +416,7 @@ class Job extends AppModel {
 				$template = 'index_user';
 				break;
 		}
-		return compact('out', 'template', 'class_status');
+		return compact('paginate', 'template', 'class_status');
 
 	}
 

@@ -27,6 +27,7 @@ App::uses('AppController', 'Controller');
 class PostcodesController extends AppController {
 	
 	public function beforeFilter() {
+	    $this->Security->unlockedActions = array('get');
 	    parent::beforeFilter(); 
 	}
 

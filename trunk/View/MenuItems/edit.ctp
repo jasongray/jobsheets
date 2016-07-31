@@ -15,6 +15,7 @@
 				<?php echo $this->element('Forms/form-menuitems');?>
 				</div>
 			</div>
+			<?php echo $this->fetch('panel-footer');?>
 		</div>
 	</div>
 	<div class="col-md-6">

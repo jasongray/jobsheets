@@ -33,7 +33,7 @@
 					<tr>
 						<td><?php echo $this->Html->link($j['Customer']['id'], array('action' => 'edit', $j['Customer']['id']), array('class'=>'edit-link'));?></td>
 						<td><?php echo $this->Html->link($j['Customer']['name'], array('action' => 'edit', $j['Customer']['id']), array('class'=>'edit-link'));?></td>
-						<td><?php echo $this->Html->link($j['Client']['name'], array('action' => 'edit', $j['Customer']['id']), array('escape' => false));?></td>
+						<td><?php echo $this->Html->link($j['Client']['name'], array('controller' => 'clients', 'action' => 'edit', $j['Customer']['id']), array('escape' => false));?></td>
 						<td><?php echo $j['Customer']['suburb']; ?></td>
 						<td class="actions">
 							<?php echo $this->Html->link('<i class="fa fa-pencil"></i>', array('action' => 'edit', $j['Customer']['id']), array('escape' => false, 'class' => 'bs-tooltip', 'title' => 'Edit', 'data-toggle' => 'tooltip')); ?>

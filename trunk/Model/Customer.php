@@ -92,18 +92,39 @@ class Customer extends AppModel {
 
 
 /**
+ * Find customers from the database
+ *
+ * @param string $type - the type of find, 'all', 'first', 'list' etc
+ * @return array
+ */
+	public function findCustomers($type = 'all') {
+		$cond = $this->getConditions();
+		return $this->find($type, $cond['paginate']);
+	}
+
+/**
+ * Find job from the database
+ *
+ * @param string $id - the job id
+ * @return array
+ */
+	public function findCustomer($id = false) {
+		if (!$id) return;
+		$cond = $this->getConditions(array('Customer.id' => $id));
+		return $this->find('first', $cond['paginate']);
+	}
+
+/**
  * Get customer for specified user conditions.
  *
  * @param array $conditions
  * @return array
  */
-	public function conditions($conditions = array(), $limit = 25, $order = array(), $joins = false){
-		$this->recursive = 2;
-	
+	public function getConditions($conditions = array(), $limit = 25, $order = array(), $joins = false){
+		$this->recursive = 1;
 		$client = CakeSession::read('Auth.User.client_id');
 		$meta = CakeSession::read('Auth.User.client_meta');
 		$role = CakeSession::read('Auth.User.role_id');
-
 		switch ($role) {
 			case 1:
 				$this->bindModel(array(
@@ -114,7 +135,7 @@ class Customer extends AppModel {
 						),
 					),
 				));
-				$order = array_merge(
+				$order = array_merge($order,
 					array(
 						'Customer.client_id ASC',
 						'Customer.id DESC'
@@ -132,7 +153,7 @@ class Customer extends AppModel {
 				);
 				$order = array_merge($order, 
 					array(
-					'Customer.created ASC, Customer.status ASC'
+						'Customer.name' => 'ASC',
 					)
 				);
 				$template = 'index';
@@ -147,14 +168,14 @@ class Customer extends AppModel {
 				);
 				$order = array_merge($order, 
 					array(
-						'Customer.status ASC, Customer.created ASC'
+						'Customer.name' => 'ASC', 
+						'Customer.created' =>  'ASC'
 					)
 				);
 				$template = 'index_user';
 				break;
 		}
-	
-		return array('conditions' => $conditions, 'limit' => $limit, 'order' => $order, 'joins' => array(), 'template' => $template);
+		return array('paginate' => array('conditions' => $conditions, 'limit' => $limit, 'order' => $order), 'template' => $template);
 	}
 	
 }

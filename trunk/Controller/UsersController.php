@@ -30,6 +30,8 @@ App::uses('CakeEmail', 'Network/Email');
  */
 class UsersController extends AppController {
 
+	public $components = array('Upload');
+
 /**
  * Before Filter method
  *
@@ -39,7 +41,7 @@ class UsersController extends AppController {
  */
 	public function beforeFilter() {
 		parent::beforeFilter();
-		$this->Auth->allow(array('register', 'verify', 'forgot', 'logout', 'session'));
+		$this->Auth->allow(array('register', 'verify', 'forgot', 'captcha', 'reset', 'logout', 'session'));
 	}
 
 /**
@@ -154,6 +156,84 @@ class UsersController extends AppController {
 	}
 
 /**
+ * Refresh captcha
+ *
+ * @return void
+ */
+	public function captcha () {
+		$this->helpers[] = 'Captcha';
+		$this->layout = 'ajax';
+	}
+
+/**
+ * Reset a user password stage one
+ *
+ * @return void
+ */
+	public function forgot () {
+		$this->helpers[] = 'Captcha';
+		$this->layout = 'login';
+		if ($this->request->is('post')) {
+			$_captcha = $this->Session->read('Reset.captcha_code');
+			if ($_captcha === $this->request->data['User']['captcha']) {
+				if ($user = $this->User->findByEmail($this->request->data['User']['email'])) {
+					$user['User']['resetcode'] = $this->User->generateResetCode($user);
+					$email = new CakeEmail('smtp');
+					$email->template('forgot', 'default');
+					$email->domain('jobsheets.com.au');
+					$email->emailFormat('both');
+					$email->to($user['User']['email']);
+					$email->subject(__('Reset your password. JobSheets - Online job management software'));
+					$email->viewVars(compact('user'));
+					if ($email->send()) {
+						$this->Flash->loginSuccess(__('A password reset link has been sent to your email address.'));
+						$this->data = null;
+					}
+				} else {
+					$this->Flash->loginWarning(__('That email address wass not found. Please try again.'));
+					$this->data = null;
+				}
+			} else {
+				$this->Flash->loginError(__('Incorrect code. Please try again.'));
+				$this->data = null;
+			}
+		}
+		
+		$this->set('title_for_layout', __('Reset your password'));
+	}
+
+/**
+ * Reset a user password
+ *
+ * @return void
+ */
+	public function reset ($resetcode = false) {
+		if ($this->Session->check('Auth.User.id')) {
+			$this->redirect(array('controller' => 'users', 'action' => 'dashboard'));
+		}
+		$this->layout = 'login';
+		if (!$resetcode) {
+			$this->Flash->loginError(__('Something went wrong.'));
+			$this->redirect(array('controller' => 'users', 'action' => 'forgot'));
+		}
+		if (!$this->User->checkResetCode($resetcode)) {
+			$this->Flash->loginError(__('Your code has expired. Please try again.'));
+			$this->redirect(array('controller' => 'users', 'action' => 'forgot'));
+		}
+		if ($this->request->is('post')) {
+			$this->User->validate_reset();
+			if ($this->User->validates()) {
+				$this->User->saveNewPassword($resetcode, $this->request->data['User']['cpassword']);
+				$this->Flash->loginSuccess(__('Your password has been successfully updated. Please login using this new password.'));
+				$this->redirect(array('controller' => 'users', 'action' => 'login'));
+			} else {
+				$this->Flash->loginError(__('Please check the errors below and try again.'));
+			}
+		}
+		$this->set('title_for_layout', __('Reset your password'));
+	}
+
+/**
  * Logout method
  *
  * Logs user out an destroys cookie values
@@ -167,10 +247,6 @@ class UsersController extends AppController {
 		$this->redirect($this->Auth->logout());
 	}
 
-	public function session(){
-		$this->autoRender = false;
-		$this->Session->destroy('Auth.User');
-	}
 /**
  * Dashboard method
  *
@@ -181,14 +257,16 @@ class UsersController extends AppController {
 	public function dashboard() {
 		
 		$invoice = array('total' => 0, 'lastweek' => 0);
-		$jobs = array('outstanding' => 0);
-		$quotes = array('count' => 0);
 
 		$online = $this->User->onlineUsers();
+
+		$this->loadModel('Quote');
+		$quotes = $this->Quote->outstanding();
 
 		$this->loadModel('Job');
 		$calendar = $this->Job->calendardata();
 		$current = $this->Job->current();
+		$jobs = $this->Job->outstanding();
 
 		$this->loadModel('Sysmsg');
 		$messages = $this->Sysmsg->find('all', array('conditions' => array('Sysmsg.status' => 1), 'order' => 'Sysmsg.created DESC'));
@@ -235,8 +313,12 @@ class UsersController extends AppController {
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			if ($this->User->saveAll($this->data)) {
-				$this->saveAvatar($this->User->id);
-				$this->saveLogo($this->request->data['Client']['id']);
+				if (!$this->saveAvatar()) {
+					$this->Flash->warning(__('User avatar not uploaded. ' . $this->Upload->getErrors(''), true));
+				}
+				if (!$this->saveLogo($this->Session->read('Auth.User.client_id'))) {
+					$this->Flash->warning(__('Client logo not uploaded. ' . $this->Upload->getErrors(''), true));
+				}
 				$this->Flash->success(__('Your profile information has been updated.'));
 			} else {
 				$this->Flash->error(__('There was an error. Please, try again.'));
@@ -273,21 +355,25 @@ class UsersController extends AppController {
 			$this->redirect(array('controller' => 'users', 'action' => 'index'));
 		}
 		if ($this->request->is('post')) {
-			$this->User->create();
+			$this->User->validate_add();
 			if ($this->User->save($this->request->data)) {
-				$this->saveAvatar($this->User->id);
-				$this->Flash->success(__('The user has been saved'));
-				$this->redirect(array('action' => 'index'));
+				if ($this->saveAvatar($this->User->id)) {
+					$this->Flash->success(__('The user has been saved'));
+					$this->redirect(array('action' => 'index'));
+				} else {
+					$this->Flash->warning(__('User avatar was not uploaded. ' . $this->Upload->getErrors(''), true));
+				}
 			} else {
 				$this->Flash->error(__('The user could not be saved. Please, try again.'));
 			}
 		}
 		$role = $this->Session->read('Auth.User.role_id');
 		if ($role === '1') {
-				$this->set('clients', $this->User->Client->find('list'));
-				$roles = $this->User->Role->find('list');				
+			$this->set('clients', $this->User->Client->find('list'));
+			$roles = $this->User->Role->find('list');				
 		} else {
 			$roles = $this->User->Role->find('list', array('conditions' => array('Role.id > ' => $role)));
+			$this->set('clients', $this->User->Client->find('list', array('conditions' => array('Client.id' => $this->Session->read('Auth.User.client_id')))));
 		}
 		$this->set(compact('roles'));
 		$this->set('title_for_layout', __('Create User'));
@@ -305,10 +391,16 @@ class UsersController extends AppController {
 			throw new NotFoundException(__('Invalid user'));
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
+			if (!empty($this->request->data['User']['password'])) {
+				$this->User->validate_passgeneral();
+			}
 			if ($this->User->save($this->data)) {
-				$this->saveAvatar($this->User->id);
-				$this->Flash->success(__('The user has been saved'));
-				$this->redirect(array('action' => 'index'));
+				if ($this->saveAvatar($id)) {
+					$this->Flash->success(__('The user has been saved'));
+					$this->redirect(array('action' => 'index'));
+				} else {
+					$this->Flash->warning(__('User avatar was not uploaded. ' . $this->Upload->getErrors(''), true));
+				}
 			} else {
 				$this->Flash->error(__('The user could not be saved. Please, try again.'));
 			}
@@ -365,19 +457,18 @@ class UsersController extends AppController {
  */	
 	private function saveAvatar($id = false) {
 		if(isset($this->request->data['Image']['file']) && $this->request->data['Image']['file']['error'] != 4){
-			$temp = $this->data['Image']['file']['tmp_name'];
-			$tdir = WWW_ROOT . 'img' . DS . 'users';
-			$dir = new Folder($tdir, true, 0766);
-			$file = pathinfo($this->request->data['Image']['file']['name']);
-			$target = time() . md5($this->data['Image']['file']['name']) . '.' . $file['extension'];
-			if(move_uploaded_file($temp, $tdir . DS . $target)){
-				$this->User->saveField('avatar', 'users' . DS . $target);
-				$this->Session->write('Auth.User.avatar', 'users' . DS . $target);
+			$this->Upload->set('uploadDir', 'img' . DS . 'users');
+			$file = $this->Upload->process($this->request->data['Image']['file']);
+			if ($file) {
+				if ($id == $this->Session->read('Auth.User.id')) {
+					$this->Session->write('Auth.User.avatar', 'users' . DS . $file);
+				}
+				$this->User->saveField('avatar', 'users' . DS . $file);
 			} else {
-				$this->Flash->warning(__('User avatar was not uploaded', true));
+				return false;
 			}
-			
 		}
+		return true;
 	}
 
 /**
@@ -399,7 +490,9 @@ class UsersController extends AppController {
 				$file->delete();
 			}
 			if ($this->User->saveField('avatar', '')) {
-				$this->Session->write('Auth.User.avatar', '');
+				if ($id == $this->Session->read('Auth.User.id')) {
+					$this->Session->write('Auth.User.avatar', '');
+				}
 				$this->Flash->success('Image was removed', true);
 			}
 		}
@@ -416,24 +509,17 @@ class UsersController extends AppController {
  */	
 	private function saveLogo($id = false) {
 		if(isset($this->request->data['Image']['logo']) && $this->request->data['Image']['logo']['error'] != 4){
-			$this->User->Client->id = $id;
-			$c = strtolower(substr($this->User->Client->field('Client.name'), 0, 2));
-			$temp = $this->data['Image']['logo']['tmp_name'];
-			$tdir = WWW_ROOT . 'img' . DS . 'logo';
-			$dir = new Folder($tdir, true, 0766);
-			$tdir = $tdir . DS . $c;
-			$dir = new Folder($tdir, true, 0766);
-
-			$file = pathinfo($this->request->data['Image']['logo']['name']);
-			$target = time() . md5($this->data['Image']['logo']['name']) . '.' . $file['extension'];
-			
-			if(move_uploaded_file($temp, $tdir . DS . $target)){
-				$this->User->Client->saveField('logo', $c . DS . $target);
+			$this->Upload->set('uploadDir', 'img' . DS . 'logo');
+			$file = $this->Upload->process($this->request->data['Image']['logo']);
+			if ($file) {
+				$this->User->Client->id = $id;
+				$this->User->Client->saveField('logo', 'logo' . DS . $file);
+				$this->Session->write('Auth.Client.logo', 'logo' . DS . $file);
 			} else {
-				$this->Flash->warning(__('Logo was not uploaded', true));
+				return false;
 			}
-			
 		}
+		return true;
 	}
 
 /**

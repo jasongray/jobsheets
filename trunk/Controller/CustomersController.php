@@ -34,6 +34,7 @@ class CustomersController extends AppController {
  * @return void
  */
 	public function beforeFilter() {
+		$this->Security->unlockedActions = array('get');
 		parent::beforeFilter();
 	}
 
@@ -45,9 +46,10 @@ class CustomersController extends AppController {
  * @return array  (Variable sent to the view will always be called data just to make things easier)
  */
 	public function index() {
-		$this->paginte = $this->Customer->conditions();
+		$resp = $this->Customer->getConditions();
+		$this->paginate = $resp['paginate'];
 		$this->set('data', $this->paginate());
-		$this->render($this->paginte['template']);
+		$this->render($resp['template']);
 	}
 
 /**
@@ -76,7 +78,6 @@ class CustomersController extends AppController {
  */
 	public function add() {
 		if ($this->request->is('post')) {
-			$this->Customer->create();
 			if ($this->Customer->save($this->request->data)) {
 				if ($this->request->is('ajax')) {
 					echo json_encode(array('response' => 'success', 'code' => '200', 'data' => array(
@@ -101,7 +102,7 @@ class CustomersController extends AppController {
 			}
 		}
 		if ($this->request->is('ajax')) {
-			$this->render('add-ajax.ctp');
+			$this->render('add-ajax');
 		}
 	}
 
@@ -125,7 +126,8 @@ class CustomersController extends AppController {
 				$this->Flash->error(__('Please fix any errors before continuing.'));
 			}
 		}
-		$this->data = $this->Customer->find('first', $this->Customer->conditions(array('Customer.id' => $id)));
+		$this->data = $this->Customer->findCustomer($id);
+		pr($this->data);
 	}
 
 /**

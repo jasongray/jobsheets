@@ -4,13 +4,13 @@
  *
  *  Used to register events for notifying the end user of notifications
  *
- *  Copyright (c) Fraudsec Pty Ltd (http://whispli.com.au)
+ *  Copyright (c) Webwidget Pty Ltd (http://whispli.com.au)
  *
  *  Licensed under The MIT license
  *  Redistributions of this file must retain the above copyright notice
  *
- *  @copyright      Copyright (c) Fraudsec Pty Ltd (http://whispli.com.au)
- *  @package        Fraudsec
+ *  @copyright      Copyright (c) Webwidget Pty Ltd (http://whispli.com.au)
+ *  @package        JobSheets
  *  @author         Jason Gray
  *  @version        1.0
  *  @license        http://www.opensource.org/licenses/mit-license.php MIT License
@@ -23,7 +23,7 @@ App::uses('CakeEmail', 'Utility');
 /**
  *   Notify event class
  *
- *   @package        Fraudsec.Lib.Event
+ *   @package        JobSheets.Lib.Event
  */ 
 class NotificationListener implements CakeEventListener {
 	
@@ -45,10 +45,6 @@ class NotificationListener implements CakeEventListener {
 			),
 			'Model.Job.updated' => array(
 				'callable' => 'updatedJobNotification',
-				'passParams' => true,
-			),
-			'Model.User.registered' => array(
-				'callable' => 'newUserNotification',
 				'passParams' => true,
 			),
 		);

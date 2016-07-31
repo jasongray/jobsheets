@@ -33,6 +33,7 @@
 
 	Router::connect('/my-profile', array('controller' => 'users', 'action' => 'profile'));
 	Router::connect('/my-jobs', array('controller' => 'jobs', 'action' => 'profile'));
+	Router::connect('/my-account', array('controller' => 'clients', 'action' => 'account'));
 
 	Router::connect('/calendar', array('controller' => 'jobs', 'action' => 'calendar'));
 

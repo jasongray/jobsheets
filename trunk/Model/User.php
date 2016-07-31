@@ -31,6 +31,25 @@ App::uses('Security', 'Utility');
 
 class User extends AppModel {
 
+	var $actsAs = array('Acl' => array('type' => 'requester'));
+
+	
+	function parentNode() {
+		if (!$this->id && empty($this->data)) {
+			return null;
+		}
+		if (isset($this->data['User']['role_id'])) {
+			$role_id = $this->data['User']['role_id'];
+		} else {
+			$role_id = $this->field('role_id');
+		}
+		if (!$role_id) {
+			return null;
+		} else {
+			return array('Role' => array('id' => $role_id));
+		}
+	}
+
 	private $key = 'N98a(8^7U2FDbS|HGKoN550m{4V50Jps';
 	private $code = '%1$s-%2$s-%1$s-%3$s';
 
@@ -95,23 +114,83 @@ class User extends AppModel {
 		);
 	}
 
+/**
+ * Validation Rules - adding user
+ *
+ * @var void
+ */
+	public function validate_add() {
+		$this->validate = array(
+			'email' => array(
+				'rule' => 'email',
+				'message' => __('Please enter a valid email address'),
+				'required' => true,
+			),
+			'firstname' => array(
+				'rule' => 'notBlank',
+				'message' => __('Please enter a name'),
+				'required' => true,
+			),
+			'role_id' => array(
+				'rule' => 'notBlank',
+				'message' => __('Please select the users role'),
+				'required' => true,
+			),
+			'password' => $this->password(),
+		);
+	}
 
-	var $actsAs = array('Acl' => array('type' => 'requester'));
-	
-	function parentNode() {
-		if (!$this->id && empty($this->data)) {
-			return null;
-		}
-		if (isset($this->data['User']['role_id'])) {
-			$role_id = $this->data['User']['role_id'];
-		} else {
-			$role_id = $this->field('role_id');
-		}
-		if (!$role_id) {
-			return null;
-		} else {
-			return array('Role' => array('id' => $role_id));
-		}
+/**
+ * Validation Rules - password reset
+ *
+ * @var void
+ */
+	public function validate_reset() {
+		$this->validate = array(
+			'password' => $this->password(),
+			'cpassword' => array(
+				'rule' => 'comparePasswords',
+				'message' => __('Passwords do not match'),
+			),
+		);
+	}
+
+/**
+ * Validation Rules - password in general
+ *
+ * @var void
+ */
+	public function validate_passgeneral() {
+		$this->validate = array(
+			'password' => $this->password()
+		);
+	}
+
+/**
+ * Clear validation object
+ */
+	public function remove_validation() {
+		$this->validate = array();
+	}
+
+/**
+ * Password validation rule
+ *
+ * @return array
+ */ 
+	public function password(){
+		return array(
+			'reset-1' => array(
+				'rule' => 'alphaNumeric',
+				'message' => __('Password must have at least 1 uppercase and 1 numeric character'),
+				'required' => false,
+			),
+			'reset-2' => array(
+				'rule' => array('minLength', 6),
+				'message' => __('Password must be at least 6 characters long'),
+				'required' => false,
+			),
+		);
 	}
 
 	public function beforeSave($options = array()) {
@@ -171,7 +250,7 @@ class User extends AppModel {
 	}
 
 	public function underlimit() {
-		$count = $this->find('count', array('conditions' => array('User.client_id' => CakeSession::read('Auth.User.client_id'))));
+		$count = $this->find('count', array('conditions' => array('User.client_id' => CakeSession::read('Auth.User.client_id'), 'User.status' => 1)));
 		if(intval($count) > intval(CakeSession::read('Auth.Client.userlimit'))) {
 			return true;
 		}
@@ -213,6 +292,11 @@ class User extends AppModel {
 	 	return false;
 	}
 
+/**
+ * Find the current users online for the specified account
+ *
+ * @return array $results Array of users and their online status
+ */	
 	public function onlineUsers() {
 		$modelName = Configure::read('Session.handler.model');
 		if (empty($modeName)) {
@@ -254,6 +338,71 @@ class User extends AppModel {
 		));
 		$this->virtualFields = array();
 		return $results;
+	}
+
+/**
+ * Save the new password for the user
+ *
+ * @param string $resetcode
+ * @param string $password
+ * @return void
+ */
+	public function saveNewPassword($resetcode = false, $password) {
+		if (!$resetcode){
+			return false;
+		}
+		$str = explode('-', base64_decode($resetcode));
+		$user = $this->find('first', array('conditions' => array('User.resetcode' => $resetcode)));
+		if (!$user) {
+			return false;
+		}
+		$this->id = $user['User']['id'];
+		$this->saveField('password', $password);
+		$this->saveField('resetcode', NULL);
+	}
+
+/**
+ * Generate a timed reset code for a password reset
+ *
+ * @param $user array
+ * @return string The code
+ */
+	public function generateResetCode($user = array()) {
+		if (empty($user)) {
+			return false;
+		}
+		$code = base64_encode($this->randomnumbers(12) . strtotime('+1 hour') . '-');
+		$this->id = $user['User']['id'];
+		$this->saveField('resetcode', $code);
+		return $code;
+	}
+
+/**
+ * Check a reset code
+ *
+ * @param $code string
+ * @return bool
+ */
+	public function checkResetCode($code = false) {
+		if (!$code){
+			return false;
+		}
+		$str = explode('-', base64_decode($code));
+		if (str_replace(substr($str[0], 0, 12), '', $str[0]) > time()) {
+			if ($this->find('first', array('conditions' => array('User.resetcode' => $code)))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+/**
+ * Check passwords match
+ *
+ * @return bool
+ */
+	public function comparePasswords() {
+		return Validation::comparison($this->data['User']['password'], '=', $this->data['User']['cpassword']);
 	}
 
 /**
