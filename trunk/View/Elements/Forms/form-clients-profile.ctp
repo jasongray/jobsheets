@@ -1,4 +1,4 @@
-<?php echo $this->Form->input('email', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Email'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
+<?php echo $this->Form->input('email', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Email'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'disabled' => 'disabled')); ?>
 <?php echo $this->Form->input('name', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Business name'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
 <?php echo $this->Form->input('address', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Address'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'value' => ''));?>
 <?php echo $this->Form->input('phone', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Phone'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
@@ -19,7 +19,18 @@
 	</div>
 </div>
 <?php echo $this->Form->input('tax_id', array('class' => 'form-control select2', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Tax')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group', 'empty' => ''));?>
-<?php echo $this->Form->input('plan_id', array('class' => 'form-control select2', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Plan')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group', 'empty' => ''));?>
+<div class="form-group">
+	<label class="col-md-2 control-label"><?php echo __('Active Users');?></label>
+	<div class="col-md-10">
+		<span class="form-control"><strong><?php echo count($this->data['User']);?></strong> <?php echo $this->Html->link(__('Manage Users'), array('controller' => 'users', 'action' => 'index'), array('class' => 'btn btn-sm btn-default pull-right', 'escape' => false));?></span>
+	</div>
+</div>
+<div class="form-group">
+	<label class="col-md-2 control-label"><?php echo __('Date Joined');?></label>
+	<div class="col-md-10">
+		<span class="form-control"><strong><?php echo $this->Time->nice($this->data['Client']['created']);?></strong></span>
+	</div>
+</div>
 
 <?php echo $this->start('panel-footer');?>
 <div class="panel-footer">

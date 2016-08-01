@@ -10,7 +10,7 @@
 			</div>
 			<div class="panel-body">
 				<div class="form-horizontal row-border">
-				<?php echo $this->element('Forms/form-clients');?>
+				<?php echo $this->element('Forms/form-clients-profile');?>
 				</div>
 			</div>
 			<?php echo $this->fetch('panel-footer');?>
@@ -23,10 +23,10 @@
 			</div>
 			<div class="panel-body">
 				<div class="form-horizontal row-border">
-				<?php echo $this->element('Forms/form-plans');?>
+				<?php echo $this->element('Forms/form-plans-profile');?>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
-<?php echo $this->Form->end();?>
+<?php echo $this->Form->end();?><?php pr($this->data);?>

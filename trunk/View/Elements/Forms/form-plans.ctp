@@ -1,59 +1,54 @@
-<div class="form-group">
-	<label class="col-md-2 control-label"> <span class="pull-left"><?php echo __('Current Plan');?></span></label>
-	<div class="col-md-10">
-		<span class="form-control"><strong><?php echo $this->data['Plan']['name'];?></strong></span>
-		<?php if ($this->data['Plan']['type'] === 'try') { ?>
-		<span class="label label-danger label-lg"><?php echo __('Days left of trial');?>: <strong><?php echo 30 - floor(strtotime($this->data['Client']['created'])/(60*60*24));?></strong></span>
-		<?php } ?>
+<?php echo $this->Form->input('name', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Name'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
+<?php echo $this->Form->input('description', array('div' => 'form-group', 'class' => 'form-control wysiwyg', 'label' => array('text' => __('Description'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
+<?php echo $this->Form->input('userlimit', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('User Limit'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
+<?php echo $this->Form->input('type', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('Type'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
+<?php echo $this->Form->input('billing', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('Billing Amt'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
+<?php echo $this->Form->input('period', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('Frequency'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'options' => array(1 => __('Monthly'), 2 => __('BiMonthly'), 4 => __('Quarterly'), 12 => __('Annually')))); ?>
+<?php echo $this->Form->input('active', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Status'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'empty' => '', 'options' => array(0 => 'Retired', 1 => 'Active'))); ?>
+<?php echo $this->start('panel-footer');?>
+<div class="panel-footer">
+	<div class="row">
+		<div class="col-md-5 col-md-offset-2">
+			<div class="btn-toolbar">
+				<?php echo $this->Form->submit('Save', array('class'=>'btn btn-primary', 'div' => false)); ?>
+				<?php echo $this->Html->link('Cancel', array('controller' => 'plans', 'action' => 'cancel', 'plugin' => false), array('class' => 'btn btn-default')); ?>
+			</div>
+		</div>
+		<div class="col-md-5">
+			<div class="btn-toolbar">
+				<?php if(!empty($this->data['Plan']['id'])){ ?>
+					<?php echo $this->Form->hidden('id');?>
+					<?php echo $this->Html->link('Delete', array('controller' => 'plans', 'action' => 'delete', 'plugin' => false, $this->data['Plan']['id']), array('class' => 'btn btn-danger pull-right')); ?>
+				<?php } ?>
+			</div>
+		</div>
 	</div>
 </div>
-<div class="form-group">
-	<label class="col-md-2 control-label"> <span class="pull-left"><?php echo __('Subscription ID');?></span></label>
-	<div class="col-md-10">
-		<span class="form-control"><strong><?php echo $this->data['Client']['subscription_id'];?></strong></span>
-	</div>
-</div>
-<?php if (!empty($plans)) { ?>
-<div class="form-group">
-	<table class="table table-condensed" cellpadding="0" cellspacing="0">
-	<thead>
-		<tr>
-			<th>
-				<?php echo __('Plan');?>
-			</th>
-			<th class="hidden-xs">
-				<?php echo __('Details');?>
-			</th>
-			<th>
-				<?php echo __('Pricing');?>
-			</th>
-			<th>
-				<?php echo __('Subscribe');?>
-			</th>
-		</tr>
-	</thead>
-	<tbody>
-	<?php foreach ($plans as $p) { ?>
-	<?php $_class = ($p['Plan']['id'] == $this->Session->read('Auth.User.Client.plan_id'))? 'info': '';?>
-		<tr class="<?php echo $_class;?>">
-			<td>
-				<?php echo $p['Plan']['name'];?>
-			</td>
-			<td class="hidden-xs">
-				<?php echo $p['Plan']['description'];?>
-			</td>
-			<td>
-				<span class="planprice"><?php echo $this->Number->currency($p['Plan']['billing'], $this->Session->read('Auth.User.locale'));?></span>
-				<br/><span class="label label-default"><?php echo __('billed monthly');?> </span>
-			</td>
-			<td>
-			<?php if(empty($_class) && $p['Plan']['id'] != 1) { ?>
-				<?php echo $this->Html->link(__('Subscribe'), array('controller' => 'clients', 'action' => 'subscribe', base64_encode(json_encode($p['Plan']))), array('class' => 'btn btn-primary', 'escape' => false));?>
-			<?php } ?>
-			</td>
-		</tr>
-	<?php } ?>
-	</tbody>
-	</table>
-</div>
-<?php } ?>
+<?php echo $this->end();?>
+
+<?php echo $this->Html->script(array(
+'plugins/bootstrap-typeahead/bootstrap-typeahead.min', 
+'plugins/select2/select2.min.js',
+'plugins/tinymce/tinymce.min',
+'plugins/tinymce/jquery.tinymce.min',
+), array('inline' => false));?>
+<?php echo $this->Html->scriptBlock("
+$(document).ready(function() {
+	
+    $('textarea.wysiwyg').tinymce({
+        plugins: [
+            \"advlist autolink lists link image charmap print preview anchor\",
+            \"searchreplace visualblocks code fullscreen textcolor colorpicker textpattern\",
+            \"insertdatetime media table contextmenu paste moxiemanager\"
+        ],
+        toolbar1: \"undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent\",
+        toolbar2: \"link image insertfile media | forecolor textpattern code\",
+        relative_urls: false,
+        remove_script_host: false,
+        schema: 'html5',
+        extended_valid_elements : 'i[class],script[type]',
+    });
+
+    $('.select2').select2();
+
+});", array('inline' => false));?>

@@ -55,6 +55,52 @@ class ClientsController extends AppController {
 	}
 
 /**
+ * add method
+ *
+ * @return void
+ */
+	public function add() {
+		if ($this->request->is('post')) {
+			$this->Client->create();
+			if ($this->Client->save($this->request->data)) {
+				$this->Flash->success('The client has been saved');
+				$this->redirect(array('action' => 'index'));
+			} else {
+				$this->Flash->error('The client could not be saved. Please, try again.');
+			}
+		}
+		$this->loadModel('Tax');
+		$this->set('taxes', $this->Tax->find('list'));
+		$this->set('plans', $this->Client->Plan->find('list'));
+	}
+
+/**
+ * edit method
+ *
+ * @param string $id
+ * @return void
+ */
+	public function edit($id = null) {
+		$this->Client->id = $id;
+		if (!$this->Client->exists()) {
+			throw new NotFoundException(__('Invalid client'));
+		}
+		if ($this->request->is('post') || $this->request->is('put')) {
+			if ($this->Client->save($this->request->data)) {
+				$this->Flash->success('The client has been saved');
+				$this->redirect(array('action' => 'index'));
+			} else {
+				$this->Flash->error('The client could not be saved. Please, try again.');
+			}
+		} else {
+			$this->request->data = $this->Client->read(null, $id);
+		}
+		$this->loadModel('Tax');
+		$this->set('taxes', $this->Tax->find('list'));
+		$this->set('plans', $this->Client->Plan->find('list'));
+	}
+
+/**
  * Client account method
  *
  * Displays list of clients account information.
@@ -76,6 +122,8 @@ class ClientsController extends AppController {
 		}
 		$this->request->data = $this->Client->findClient($this->Session->read('Auth.User.client_id'));
 		$this->set('plans', $this->Client->Plan->findPlans());
+		$this->loadModel('Tax');
+		$this->set('taxes', $this->Tax->find('list'));
 		$this->set('title_for_layout', __('My Account'));
 	}
 
@@ -124,7 +172,7 @@ class ClientsController extends AppController {
 				$this->Flash->success('Logo was removed', true);
 			}
 		}
-		$this->redirect(array('action' => 'account'));
+		$this->redirect($this->referrer());
 	}
 
 }
