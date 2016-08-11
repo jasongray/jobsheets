@@ -1,10 +1,10 @@
 <?php
 /**
- * Job model.
+ * Invoice model.
  *
- * Job role model-related methods here.
+ * Invoice role model-related methods here.
  *
- * JobSheets : A tradies best friend (http://jobsheets.com.au)
+ * InvoiceSheets : A tradies best friend (http://jobsheets.com.au)
  * Copyright (c) Webwidget Pty Ltd. (http://webwidget.com.au)
  *
  * Licensed under The MIT License
@@ -12,65 +12,25 @@
  * Redistributions of files must retain the above copyright notice.
  *
  * @copyright     Copyright (c) Webwidget Pty Ltd. (http://webwidget.com.au)
- * @link          http://jobsheets.com.au JobSheet Project
- * @package       JobSheet.Model
- * @since         JobSheets v 0.0.1
+ * @link          http://jobsheets.com.au InvoiceSheet Project
+ * @package       InvoiceSheet.Model
+ * @since         InvoiceSheets v 0.0.1
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
 App::uses('AppModel', 'Model');
 App::uses('CakeEvent', 'Event');
 
 /**
- * Job Model
+ * Invoice Model
  *
  */
-class Job extends AppModel {
+class Invoice extends AppModel {
 /**
  * Display field
  *
  * @var string
  */
 	public $displayField = '';
-
-/**
- * Validation Rules
- *
- * @var void
- */
-	public function validate_create_location() {
-		$this->validate = array(
-			'address_street' => array(
-				'rule' => 'notBlank',
-				'message' => __('An address must have a street name'),
-				'required' => false,
-			),
-			'postcode_id' => array(
-				'postcode' => array(
-					'rule' => array('postcodeExists'),
-					'message' => __('Please select a suburb from the dropdown list'),
-					'last' => true,
-					'required' => false,
-				),
-			),
-		);
-	}
-
-	public function validate_create_customer() {
-		$this->validate = array(
-			'customer_id' => array(
-				'customer' => array(
-					'rule' => array('customerExists'),
-					'message' => __('Please select a customer from the list or create a new customer record before continuing'),
-					'last' => true,
-					'required' => false,
-				),
-			),
-		);
-	} 
-
-	public function remove_validation() {
-		$this->validate = array();
-	}
 
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
@@ -116,8 +76,8 @@ class Job extends AppModel {
  * @var array
  */
 	public $hasMany = array(
-		'JobItem' => array(
-			'className' => 'JobItem',
+		'InvoiceItem' => array(
+			'className' => 'InvoiceItem',
 			'foreignKey' => 'job_id',
 			'dependent' => true,
 			'conditions' => '',
@@ -129,8 +89,8 @@ class Job extends AppModel {
 			'finderQuery' => '',
 			'counterQuery' => ''
 		),
-		'JobLog' => array(
-			'className' => 'JobLog',
+		'InvoiceLog' => array(
+			'className' => 'InvoiceLog',
 			'foreignKey' => 'job_id',
 			'dependent' => false,
 			'conditions' => '',
@@ -146,14 +106,14 @@ class Job extends AppModel {
 
 
 	public function beforeSave($options = array()) {
-		if (!isset($this->data['Job']['id']) && !$this->id) {
-			$this->data['Job']['id'] = $this->generateID(time(), 0, false);
+		if (!isset($this->data['Invoice']['id']) && !$this->id) {
+			$this->data['Invoice']['id'] = $this->generateID(time(), 0, false);
 		}
-		if (empty($this->data['Job']['client_id'])) {
-			$this->data['Job']['client_id'] = CakeSession::read('Auth.User.client_id');
+		if (empty($this->data['Invoice']['client_id'])) {
+			$this->data['Invoice']['client_id'] = CakeSession::read('Auth.User.client_id');
 		}
-		if (empty($this->data['Job']['client_meta'])) {
-			$this->data['Job']['client_meta'] = CakeSession::read('Auth.User.client_meta');
+		if (empty($this->data['Invoice']['client_meta'])) {
+			$this->data['Invoice']['client_meta'] = CakeSession::read('Auth.User.client_meta');
 		}
 	    return true;
 
@@ -161,11 +121,11 @@ class Job extends AppModel {
 	
 	public function afterSave($created, $options = array()) {
 		if ($created) {
-			$event = new CakeEvent('Model.Job.new', $this, array(
+			$event = new CakeEvent('Model.Invoice.new', $this, array(
 			    'data' => $this->data
 			));
 		} else {
-			$event = new CakeEvent('Model.Job.updated', $this, array(
+			$event = new CakeEvent('Model.Invoice.updated', $this, array(
 			    'data' => $this->data
 			));
 		}
@@ -248,7 +208,7 @@ class Job extends AppModel {
 	}
 
 /**
- * Jobs in nice pretty calendar format
+ * Invoices in nice pretty calendar format
  *
  * @param $start Start datetime string
  * @param $end End satetime string
@@ -263,13 +223,13 @@ class Job extends AppModel {
 		}
 		return $this->find('all', array(
 			'conditions' => array(
-				'Job.allocated BETWEEN ? AND ?' => array($start, $end), 
-				'Job.status' => 1,
-				'Job.client_id' => CakeSession::read('Auth.User.client_id'),
-				'Job.client_meta' => CakeSession::read('Auth.User.client_meta'),
+				'Invoice.allocated BETWEEN ? AND ?' => array($start, $end), 
+				'Invoice.status' => 1,
+				'Invoice.client_id' => CakeSession::read('Auth.User.client_id'),
+				'Invoice.client_meta' => CakeSession::read('Auth.User.client_meta'),
 			),
 			'order' => array(
-				'Job.allocated ASC'
+				'Invoice.allocated ASC'
 			),
 		));
 
@@ -284,12 +244,12 @@ class Job extends AppModel {
 		$this->recursive = 0;
 		return $this->find('all', array(
 			'conditions' => array( 
-				'Job.status <' => 9,
-				'Job.client_id' => CakeSession::read('Auth.User.client_id'),
-				'Job.client_meta' => CakeSession::read('Auth.User.client_meta'),
+				'Invoice.status <' => 9,
+				'Invoice.client_id' => CakeSession::read('Auth.User.client_id'),
+				'Invoice.client_meta' => CakeSession::read('Auth.User.client_meta'),
 			),
 			'order' => array(
-				'Job.allocated ASC'
+				'Invoice.allocated ASC'
 			),
 			'limit' => 12
 		));
@@ -302,19 +262,19 @@ class Job extends AppModel {
  */
 	public function outstanding() {
 		$this->recursive = 0;
-		$this->virtualFields = array('cnt' => 'COUNT(DISTINCT(Job.id))');
+		$this->virtualFields = array('cnt' => 'COUNT(DISTINCT(Invoice.id))');
 		$data = $this->find('first', array(
 			'fields' => array(
-				'Job.cnt',
+				'Invoice.cnt',
 			),
 			'conditions' => array( 
-				'Job.status' => 0,
-				'Job.client_id' => CakeSession::read('Auth.User.client_id'),
-				'Job.client_meta' => CakeSession::read('Auth.User.client_meta'),
+				'Invoice.status' => 0,
+				'Invoice.client_id' => CakeSession::read('Auth.User.client_id'),
+				'Invoice.client_meta' => CakeSession::read('Auth.User.client_meta'),
 			),
 		));
 		if ($data) {
-			return array('outstanding' => $data['Job']['cnt']);
+			return array('outstanding' => $data['Invoice']['cnt']);
 		} else {
 			return array('outstanding' => 0);
 		}
@@ -326,8 +286,8 @@ class Job extends AppModel {
  * @param string $type - the type of find, 'all', 'first', 'list' etc
  * @return array
  */
-	public function findJobs($type = 'all') {
-		$cond = $this->getJobs();
+	public function findInvoices($type = 'all') {
+		$cond = $this->getInvoices();
 		return $this->find($type, $cond['paginate']);
 	}
 
@@ -337,25 +297,13 @@ class Job extends AppModel {
  * @param string $id - the job id
  * @return array
  */
-	public function findJob($id = false) {
+	public function findInvoice($id = false) {
 		if (!$id) return;
-		$cond = $this->getJobs(array('Job.id' => $id));
-		$this->bindModel(array('hasMany' => array('JobItem')), false);
+		$cond = $this->getInvoices(array('Invoice.id' => $id));
+		$this->bindModel(array('hasMany' => array('InvoiceItem')), false);
 		return $this->find('first', $cond['paginate']);
 	}
-
-/**
- * Find jobs from the database
- *
- * @param string $type - the type of find, 'all', 'first', 'list' etc
- * @return array
- */
-	public function findByCustomer($conditions = array()) {
-		$cond = $this->getJobs($conditions);
-		$this->recursive = -1;
-		return $this->find('all', $cond['paginate']);
-	}
-
+Invoice
 /**
  * Get jobs for the index view
  *
@@ -363,12 +311,12 @@ class Job extends AppModel {
  * @param bool $role - Override role and return user jobs only
  * @return array
  */
-	public function getJobs($conditions = array(), $limit = 25, $order = array(), $joins = false, $status = null, $role = false) {
+	public function getInvoices($conditions = array(), $limit = 25, $order = array(), $joins = false, $status = null, $role = false) {
 		$this->recursive = 2;
 		
-		$this->unBindModel(array('hasMany' => array('JobItem')), false);
+		$this->unBindModel(array('hasMany' => array('InvoiceItem')), false);
 		$this->Client->unBindModel(array('hasMany' => array('User')), false);
-		$this->Location->unBindModel(array('hasMany' => array('Job')), false);
+		$this->Location->unBindModel(array('hasMany' => array('Invoice')), false);
 		$this->User->unBindModel(array('belongsTo' => array('Role', 'Client')), false);
 		
 		$role = CakeSession::read('Auth.User.role_id');
@@ -376,15 +324,15 @@ class Job extends AppModel {
 		$client_id = CakeSession::read('Auth.User.client_id');
 		$client_meta = CakeSession::read('Auth.User.client_meta');
 
-		$JobStatus = array('Job.status <' => 8);
+		$InvoiceStatus = array('Invoice.status <' => 8);
 		$class_status = 'default';
 
 		if (isset($status) && !empty($status)) {
 			if ($status == 'completed') {
-				$JobStatus = array('Job.status' => 8);
+				$InvoiceStatus = array('Invoice.status' => 8);
 			}
 			if ($status == 'cancelled') {
-				$JobStatus = array('Job.status' => 9);
+				$InvoiceStatus = array('Invoice.status' => 9);
 			}
 			$class_status = $status;
 		} 
@@ -396,7 +344,7 @@ class Job extends AppModel {
 						$conditions
 					,
 					'limit' => 25, 
-					'order' => array('Job.client_id ASC', 'Job.id DESC')
+					'order' => array('Invoice.client_id ASC', 'Invoice.id DESC')
 				);
 				$template = 'admin_index';
 				break;
@@ -404,12 +352,12 @@ class Job extends AppModel {
 			case 3:
 				$paginate = array(
 					'conditions' => array_merge(array(
-						'Job.client_id' => $client_id,
-						'Job.client_meta' => $client_meta,
-						), $JobStatus, $conditions
+						'Invoice.client_id' => $client_id,
+						'Invoice.client_meta' => $client_meta,
+						), $InvoiceStatus, $conditions
 					),
 					'limit' => 25, 
-					'order' => array('Job.created ASC, Job.status ASC'),
+					'order' => array('Invoice.created ASC, Invoice.status ASC'),
 				);
 				$template = 'index';
 				break;
@@ -417,13 +365,13 @@ class Job extends AppModel {
 			default:
 				$paginate = array(
 					'conditions' => array_merge(array(
-						'Job.user_id' => CakeSession::read('Auth.User.id'),
-						'Job.client_id' => $client_id,
-						'Job.client_meta' => $client_meta,
-						), $JobStatus, $conditions
+						'Invoice.user_id' => CakeSession::read('Auth.User.id'),
+						'Invoice.client_id' => $client_id,
+						'Invoice.client_meta' => $client_meta,
+						), $InvoiceStatus, $conditions
 					),
 					'limit' => 25, 
-					'order' => array('Job.status ASC, Job.created ASC'),
+					'order' => array('Invoice.status ASC, Invoice.created ASC'),
 				);
 				$template = 'index_user';
 				break;
@@ -432,46 +380,4 @@ class Job extends AppModel {
 
 	}
 
-/**
- * Convert a job to an invoice
- *
- * @param $id integer The job ID
- * @return bool
- */
-	public function convertToInvoice($job_id = null) {
-		if ($job_id) {
-			$this->id = $job_id;
-			if ($this->exists()) {
-				// read quote information
-				$this->recursive = -1;
-				$q = $this->read(null, $this->id);
-				unset($q['Job']['id']); 
-				unset($q['Job']['created']); 
-				unset($q['Job']['modified']); 
-				$data['Invoice'] = array_merge(
-					$q['Job'],
-					array('reference' => __('From job #'.$this->id))
-				);
-				App::uses('Invoice', 'Model');
-				$this->Invoice = new Invoice();
-				$this->Invoice->create();
-				if ($this->Invoice->save($data)) {
-					// read quote items to place them into the job items
-					$qi = $this->JobItem->find('all', array('conditions' => array('job_id' => $this->id)));
-					$ji = array();
-					if ($qi) {
-						foreach ($qi as $_qi) {
-							$ji[] = array('invoice_id' => $this->Invoice->id, 'description' => $_qi['JobItem']['description'], 'amount' => $_qi['JobItem']['amount'], 'status' => 1);
-						}
-						if (!empty($ji)) {
-							$this->Invoice->InvoiceItem->saveAll($ji);
-						}
-					}
-					return $this->Invoice->id;
-				}
-			}
-		}
-		return false;
-	}
-	
 }

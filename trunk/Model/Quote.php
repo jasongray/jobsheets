@@ -182,6 +182,18 @@ class Quote extends AppModel {
 		$this->bindModel(array('hasMany' => array('QuoteItem')), false);
 		return $this->find('first', $cond['paginate']);
 	}
+	
+/**
+ * Find jobs from the database
+ *
+ * @param string $type - the type of find, 'all', 'first', 'list' etc
+ * @return array
+ */
+	public function findByCustomer($conditions = array()) {
+		$cond = $this->getQuotes($conditions);
+		$this->recursive = -1;
+		return $this->find('all', $cond['paginate']);
+	}
 
 /**
  * Get jobs for the index view

@@ -145,6 +145,10 @@ class CustomersController extends AppController {
 			}
 		}
 		$this->data = $this->Customer->findCustomer($id);
+		$this->loadModel('Job');
+		$this->set('jobs', $this->Job->findByCustomer(array('Job.customer_id' => $id)));
+		$this->loadModel('Quote');
+		$this->set('quotes', $this->Quote->findByCustomer(array('Quote.customer_id' => $id)));
 	}
 
 /**

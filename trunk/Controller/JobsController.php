@@ -301,4 +301,24 @@ class JobsController extends AppController {
 
 	}
 
+/**
+ * Create invoice from job
+ *
+ * @param int $id Job Id
+ * @return void
+ */ 
+	public function invoice($id = false) {
+		if ($id){
+			$this->Job->id = $id;
+			if (!$this->Job->exists()) {
+				throw new NotFoundException(__('Invalid job id'));
+			}
+			if ($inv_id = $this->Job->convertToInvoice($id)) {
+				$this->redirect(array('controller' => 'invoices', 'action' => 'edit', $inv_id));
+				return;
+			}
+		}	
+		$this->redirect($this->referrer());
+	}
+
 }

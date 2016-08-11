@@ -334,7 +334,7 @@ class User extends AppModel {
 				'User.client_meta' => CakeSession::read('Auth.User.client_meta'),
 			),
 			'order' => 'User.id',
-			'group' => 'User.id',
+			'group' => array('User.id', 'Session.id'),
 		));
 		$this->virtualFields = array();
 		return $results;

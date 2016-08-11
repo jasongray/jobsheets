@@ -1,12 +1,46 @@
 <div class="tabbable box-tabs">
 	<ul class="nav nav-tabs">
-		<li class="active"><a href="#customer_job_quotes" data-toggle="tab"><i class="icon-tag"></i> <?php echo __('Jobs & Quotes');?></a></li>
-		<li><a href="#customer_note_log" data-toggle="tab"><i class="icon-search"></i> <?php echo __('Customer Log');?></a></li>
+		<li class="active"><a href="#customer_jobs" data-toggle="tab"><i class="fa fa-wrench"></i> <?php echo __('Jobs');?></a></li>
+		<li><a href="#customer_quotes" data-toggle="tab"><i class="fa fa-hashtag"></i> <?php echo __('Quotes');?></a></li>
+		<li><a href="#customer_note_log" data-toggle="tab"><i class="fa fa-search"></i> <?php echo __('Customer Log');?></a></li>
 		
 	</ul>
 	<div class="tab-content">
-		<div class="tab-pane active" id="customer_job_quotes">
-			
+		<div class="tab-pane active" id="customer_jobs">
+			<?php if (!empty($jobs)) { ?>
+			<ul class="panel-tasks">
+			<?php foreach($jobs as $j) { ?>
+				<li class="item-primary">
+					<label>
+						<span class="item-description"><?php echo $this->Html->link($j['Job']['id'], array('controller' => 'jobs', 'action' => 'edit', $j['Job']['id']));?></span>
+						<?php echo $this->Html->jobStatus($j['Job']['status']); ?>
+					</label>
+					<div class="options todooptions">
+						<div class="btn-group">
+							<?php echo $this->Html->link('<i class="fa fa-eye"></i>', array('controller' => 'jobs', 'action' => 'view', $j['Job']['id']), array('class' => 'btn btn-xs btn-default', 'escape' => false));?>
+						</div>
+					</div>
+			<?php } ?>
+			</ul>
+			<?php } ?>
+		</div>
+		<div class="tab-pane" id="customer_quotes">
+			<?php if (!empty($quotes)) { ?>
+			<ul class="panel-tasks">
+			<?php foreach($quotes as $q) { ?>
+				<li class="item-success">
+					<label>
+						<span class="item-description"><?php echo $this->Html->link($q['Quote']['id'], array('controller' => 'quotes', 'action' => 'edit', $q['Quote']['id']));?></span>
+						<?php echo $this->Html->jobStatus($q['Quote']['status']); ?>
+					</label>
+					<div class="options todooptions">
+						<div class="btn-group">
+							<?php echo $this->Html->link('<i class="fa fa-eye"></i>', array('controller' => 'quotes', 'action' => 'view', $q['Quote']['id']), array('class' => 'btn btn-xs btn-default', 'escape' => false));?>
+						</div>
+					</div>
+			<?php } ?>
+			</ul>
+			<?php } ?>
 		</div>
 		<div class="tab-pane" id="customer_note_log">
 			<?php echo $this->Form->create('CustomerNote', array('style' => 'padding-top:15px;', 'id' => 'CustomerNoteForm'));?>
