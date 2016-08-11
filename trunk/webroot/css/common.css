@@ -1,23 +1,6 @@
 .card-shadow {
   box-shadow: 0 0.1em 0.25em rgba(0, 0, 0, 0.1), 0 0.1em 0.2em rgba(0, 0, 0, 0.1);
 }
-body {
-  position: relative;
-  background-color: #e4e9f0;
-  color: #444444;
-  padding-top: 60px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-a:active,
-a:focus {
-  outline: 0;
-}
-.main-container {
-  padding: 30px 15px 0px 15px;
-}
 .animated {
   -webkit-animation-duration: 1s;
   animation-duration: 1s;
@@ -129,4 +112,54 @@ a:focus {
 }
 .data-align-right {
   text-align: right;
+}
+.planprice {
+  font-size: 1.7em;
+}
+.planpricelg {
+  font-size: 2.6em;
+  font-weight: bold;
+}
+ul.card_logos {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.card_visa, .card_mastercard, .card_amex, .card_discover, .card_diners, .card_jcb {
+  display: inline-block;
+  width: 50px;
+  height: 30px;
+  overflow: hidden;
+  text-align: left;
+  text-indent: -999px;
+  background: url(../img/sprite-cards.png) 0 0 no-repeat;
+}
+
+.card_mastercard {
+  background-position: -55px 0;
+}
+
+.card_amex {
+  background-position: -110px 0;
+}
+
+.card_discover {
+  background-position: -165px 0;
+}
+
+.card_diners {
+  background-position: -220px 0;
+}
+
+.card_jcb {
+  background-position: -660px 0;
+}
+
+.is_visa li, .is_mastercard li, .is_amex li, .is_discover li, .is_diners li, .is_jcb li, .is_nothing li {
+  opacity: .2;
+}
+
+.is_visa li.card_visa, .is_mastercard li.card_mastercard, .is_amex li.card_amex, .is_discover li.card_discover, .is_diners li.card_diners, .is_jcb li.card_jcb {
+  opacity: 1;
 }

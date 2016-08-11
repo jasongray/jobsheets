@@ -29,4 +29,4 @@
 		</div>
 	</div>
 </div>
-<?php echo $this->Form->end();?><?php pr($this->data);?>
+<?php echo $this->Form->end();?>

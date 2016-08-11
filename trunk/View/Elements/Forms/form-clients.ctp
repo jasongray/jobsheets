@@ -18,8 +18,11 @@
 		</div>
 	</div>
 </div>
+<?php echo $this->Form->input('status', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Active'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'empty' => '', 'options' => array(0 => 'No', 1 => 'Yes'))); ?>
 <?php echo $this->Form->input('tax_id', array('class' => 'form-control select2', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Tax')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group', 'empty' => ''));?>
 <?php echo $this->Form->input('plan_id', array('class' => 'form-control select2', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Plan')), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'div' => 'form-group', 'empty' => ''));?>
+<?php echo $this->Form->input('userlimit', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('User limit'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '<span class="help-block">'.__('Set to zero (0) for unlimited users').'</span></div>')); ?>
+<?php echo $this->Form->input('acc_days', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Trial limit'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '<span class="help-block">'.__('Set to zero (0) for unlimited days').'</span></div>')); ?>
 
 <?php echo $this->start('panel-footer');?>
 <div class="panel-footer">

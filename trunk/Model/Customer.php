@@ -28,6 +28,28 @@ App::uses('AppModel', 'Model');
 
 class Customer extends AppModel {
 
+
+/**
+ * hasMany associations
+ *
+ * @var array
+ */
+	public $hasMany = array(
+		'CustomerNote' => array(
+			'className' => 'CustomerNote',
+			'foreignKey' => 'customer_id',
+			'dependent' => false,
+			'conditions' => '',
+			'fields' => '',
+			'order' => 'CustomerNote.created DESC',
+			'limit' => '',
+			'offset' => '',
+			'exclusive' => '',
+			'finderQuery' => '',
+			'counterQuery' => ''
+		)
+	);
+
 	public function getCustomerString($str) {
 		$array = array();
 		$this->virtualFields = array('address' => 'IFNULL(billing_address, CONCAT(
@@ -36,6 +58,7 @@ class Customer extends AppModel {
 			COALESCE(address_street, ""), IF(LENGTH(address_street), "\r\n", ""), 
 			COALESCE(suburb, ""), IF(LENGTH(suburb), " ", "")
 			))');
+		$this->recursive = -1;
 		$result = $this->find('all', array(
 			'fields' => array(
 				'id', 'name', 'address', 'phone', 'email', 'contact'
@@ -60,6 +83,7 @@ class Customer extends AppModel {
 	public function getLocation($id = false) {
 		if ($id) {
 			$this->virtualFields = array('contact_name' => 'Customer.contact', 'contact_phone' => 'Customer.phone', 'contact_email' => 'Customer.email');
+			$this->recursive = -1;
 			$result = $this->find('first', array(
 				'fields' => array(
 					'property', 'unit', 'address_from', 'address_to', 'address_street', 'suburb', 'postcode_id',
@@ -90,6 +114,25 @@ class Customer extends AppModel {
 
 	}
 
+/**
+ * Add a note to the customer log
+ *
+ * @param array $data
+ * @return array 
+ */
+	public function addNote($data = array()) {
+		if (empty($data)) {
+			return array('code' => '404', 'message' => __('Error no note to add'));
+		}
+		if (!isset($data['CustomerNote']['customer_id']) && empty($data['CustomerNote']['customer_id'])) {
+			return array('code' => '400', 'message' => __('Error no customer_id'));
+		}
+		$this->CustomerNote->create();
+		if ($this->CustomerNote->save($data)) {
+			return array('code' => '200', 'message' => __('Customer note saved'));	
+		}
+		return array('code' => '400', 'message' => __('Error note not saved'));
+	}
 
 /**
  * Find customers from the database

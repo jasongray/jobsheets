@@ -17,10 +17,11 @@
 			<?php echo $this->fetch('panel-footer');?>
 		</div>
 	</div>
+<?php echo $this->Form->end();?>
 	<div class="col-md-6">
 		<div class="panel panel-midnightblue">
 			<div class="panel-heading">
-				<h4><i class="fa fa-cog"></i> <?php echo __('Contact Information');?></h4>
+				<h4><i class="fa fa-info-circle"></i> <?php echo __('More Information');?></h4>
 			</div>
 			<div class="panel-body">
 				<div class="form-horizontal row-border">
@@ -30,4 +31,3 @@
 		</div>
 	</div>
 </div>
-<?php echo $this->Form->end();?>

@@ -1,4 +1,8 @@
 <?php echo $this->Form->input('name', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Customer Name')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+<?php echo $this->Form->input('contact', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Contact')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+<?php echo $this->Form->input('email', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Email')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+<?php echo $this->Form->input('phone', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Phone')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
+<?php echo $this->Html->tag('h4', __('Physical Address'));?>
 <?php echo $this->Form->input('property', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Property Name')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
 <?php echo $this->Form->input('unit', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Unit Number')), 'between' => '<div class="col-md-2">', 'after' => '</div>', 'div' => 'form-group'));?>
 <div class="form-group">
@@ -8,7 +12,8 @@
 <?php echo $this->Form->input('address_street', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Street')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
 <?php echo $this->Form->input('suburb', array('class' => 'form-control typeahead', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Suburb / Postcode')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group', 'data-provide' => 'typeahead', 'data-url' => $this->Html->url(array('controller' => 'postcodes', 'action' => 'get')), 'autocomplete' => 'off'));?>
 <?php echo $this->Form->input('postcode_id', array('class' => 'form-control hidden', 'label' => false));?>				
-
+<?php echo $this->Html->tag('h4', __('Billing Address'));?>
+<?php echo $this->Form->input('billing_address', array('class' => 'form-control', 'label' => array('class' => 'col-md-2 control-label', 'text' => __('Billing Address')), 'between' => '<div class="col-md-6">', 'after' => '</div>', 'div' => 'form-group'));?>
 <?php echo $this->start('panel-footer');?>
 <div class="panel-footer">
 	<div class="row">
@@ -22,6 +27,7 @@
 			<div class="btn-toolbar">
 				<?php if(!empty($this->data['Customer']['id'])){ ?>
 					<?php echo $this->Form->hidden('id');?>
+                    <?php echo $this->Form->hidden('client_meta');?>
 					<?php echo $this->Html->link('Delete', array('controller' => 'customers', 'action' => 'delete', 'plugin' => false, $this->data['Customer']['id'], ), array('class' => 'btn btn-danger pull-right')); ?>
 				<?php } ?>
 			</div>

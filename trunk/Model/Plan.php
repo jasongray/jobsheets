@@ -38,8 +38,8 @@ class Plan extends AppModel {
  * @param integer $plan_id The current plan id in the event that plan is retired
  * @return array
  */
-	public function findPlans($plan_id = array()){
-		$this->recursive = -1;
+	public function getAllPlans($plan_id = array()){
+		$this->recursive = 0;
 		$extra = array();
 		if (!empty($plan_id)) {
 			$extra = array('Plan.id IN' => $plan_id);

@@ -69,6 +69,52 @@ class Client extends AppModel {
 		)
 	);
 
+	public function subscribe_validate() {
+		$this->validate = array(
+			'number' => array(
+				'rule' => array('cc', 'all', true, null),
+				'message' => __('Please enter a valid credit card number'),
+			),
+			'ccv' => array(
+				'ccvrule1' => array(
+					'rule' => 'numeric',
+					'message' => __('Please enter a valid security code'),
+				),
+				'ccvrule2' => array(
+					'rule' => array('lengthBetween', 3, 4),
+					'message' => __('Please enter a valid security code'),	
+				),
+			),
+			'exmonth' => array(
+				'rule' => array('checkExpiry', 'exyear'),
+				'message' => __('Please enter a valid expiry date'),
+			),
+		);
+	}
+
+/**
+ * Checks the expiry date of CC entered
+ *
+ * @param string $check
+ * @param string $other
+ * @return bool
+ */
+	public function checkExpiry($check, $other) {
+		$date = $this->data[$this->name][$other].$check['exmonth'];
+		$now = date('Ym');
+		if (Validation::comparison($now, '>', $date)) {
+			return false;
+		}
+		return true;
+	}
+
+/**
+ * Before save method
+ * Called before the data is saved to the database
+ *
+ * @param array $options
+ * @return bool
+ */
 	public function beforeSave($options = array()) {
 		if (!isset($this->data['Client']['client_meta']) && !empty($this->data['Client']['name'])) {
 			$this->data['Client']['client_meta'] = base64_encode(time().$this->data['Client']['name']);

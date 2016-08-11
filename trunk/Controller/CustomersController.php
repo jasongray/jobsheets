@@ -58,9 +58,27 @@ class CustomersController extends AppController {
  * @return void
  */
 	public function get() {
+		header("Content-type: application/json");
 		$this->autoRender = false;
 		if ($this->request->is('ajax')  && $this->request->is('post')) {
 			$result = $this->Customer->getCustomerString($this->request->data['search']);
+			if ($result) {
+				return json_encode($result);
+			}
+		}
+		return null;
+	}
+
+/**
+ * addnote method
+ *
+ * @return void
+ */
+	public function addnote() {
+		header("Content-type: application/json");
+		$this->autoRender = false;
+		if ($this->request->is('ajax') && $this->request->is('post')) {
+			$result = $this->Customer->addNote($this->request->data);
 			if ($result) {
 				return json_encode($result);
 			}
@@ -119,7 +137,7 @@ class CustomersController extends AppController {
 			throw new NotFoundException(__('Invalid job ID'));
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
-			if ($this->Customer->saveAll($this->request->data)) {
+			if ($this->Customer->save($this->request->data)) {
 				$this->Flash->success(__('Customer updated.'));
 				$this->redirect(array('action' => 'edit', $this->Customer->id));
 			} else {
@@ -127,7 +145,6 @@ class CustomersController extends AppController {
 			}
 		}
 		$this->data = $this->Customer->findCustomer($id);
-		pr($this->data);
 	}
 
 /**

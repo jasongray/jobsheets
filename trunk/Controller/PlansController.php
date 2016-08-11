@@ -23,6 +23,8 @@ App::uses('AppController', 'Controller');
  * @property Plan $Plan
  */
 class PlansController extends AppController {
+
+	public $components = array('PayPalSDK');
 	
 	public function beforeFilter() {
 	    parent::beforeFilter(); 
@@ -40,17 +42,43 @@ class PlansController extends AppController {
 	}
 
 /**
- * view method
+ * activate a plan
  *
- * @param string $id
- * @return void
+ * @param string $planId
+ * @return bool
  */
-	public function view($id = null) {
-		$this->Plan->id = $id;
-		if (!$this->Plan->exists()) {
-			throw new NotFoundException(__('Invalid plan'));
+	public function activate($planId = false) {
+		$this->autoRender = false;
+		if ($this->request->is('ajax')) { 
+			if ($this->PayPalSDK->activatePlan($planId)){
+				$data = $this->Plan->findByBillingPlanId($planId);
+				$this->Plan->id = $data['Plan']['id'];
+				$this->Plan->saveField('active', 1);
+				echo json_encode(array('code' => '200', 'message' => 'success'));
+			} else {
+				echo json_encode(array('code' => '400', 'message' => 'error'));
+			}
 		}
-		$this->set('plan', $this->Plan->read(null, $id));
+	}
+
+/**
+ * deactivate a plan
+ *
+ * @param string $planId
+ * @return bool
+ */
+	public function deactivate($planId = false) {
+		$this->autoRender = false;
+		if ($this->request->is('ajax')) { 
+			//if ($this->PayPalSDK->activatePlan($planId, 'CREATED')){
+				$data = $this->Plan->findByBillingPlanId($planId);
+				$this->Plan->id = $data['Plan']['id'];
+				$this->Plan->saveField('active', 1);
+				echo json_encode(array('code' => '200', 'message' => 'success'));
+			//} else {
+			//	echo json_encode(array('code' => '400', 'message' => 'error'));
+			//}
+		}
 	}
 
 /**
@@ -62,6 +90,12 @@ class PlansController extends AppController {
 		if ($this->request->is('post')) {
 			$this->Plan->create();
 			if ($this->Plan->save($this->request->data)) {
+				if ($billingId = $this->PayPalSDK->createPlan($this->request->data)) {
+					$this->Plan->saveField('billing_plan_id', $billingId);
+					if ($this->request->data['Plan']['active'] == 1) {
+						$this->PayPalSDK->activatePlan($billingId);
+					}
+				}
 				$this->Flash->success('The plan has been saved');
 				$this->redirect(array('action' => 'index'));
 			} else {
@@ -83,6 +117,14 @@ class PlansController extends AppController {
 		}
 		if ($this->request->is('post') || $this->request->is('put')) {
 			if ($this->Plan->save($this->request->data)) {
+				if (empty($this->request->data['Plan']['billing_plan_id'])) {
+					if ($billingId = $this->PayPalSDK->createPlan($this->request->data)) {
+						$this->Plan->saveField('billing_plan_id', $billingId);
+					}
+				}
+				if ($this->request->data['Plan']['active'] == 1) {
+						$this->PayPalSDK->activatePlan($billingId);
+					}
 				$this->Flash->success('The plan has been saved');
 				$this->redirect(array('action' => 'index'));
 			} else {
@@ -90,6 +132,7 @@ class PlansController extends AppController {
 			}
 		} else {
 			$this->request->data = $this->Plan->read(null, $id);
+			$this->set('plan_data', $this->PayPalSDK->getPlan($this->request->data['Plan']['billing_plan_id']));
 		}
 	}
 
@@ -104,7 +147,9 @@ class PlansController extends AppController {
 		if (!$this->Plan->exists()) {
 			throw new NotFoundException(__('Invalid plan'));
 		}
+		$data = $this->Plan->read(null, $id);
 		if ($this->Plan->delete()) {
+			$this->PayPalSDK->deletePlan($data['Plan']['billing_plan_id']);
 			$this->Flash->success('Plan deleted');
 			$this->redirect(array('action' => 'index'));
 		}

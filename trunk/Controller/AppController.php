@@ -71,9 +71,7 @@ class AppController extends Controller {
 			'loginRedirect' => array('controller' => 'jobs', 'action' => 'index'),
 		),
 		'Acl',
-		'Security' => array(
-			'blackHoleCallback' => 'blackhole',
-		),
+		'Security',
 		'Session',
 		'Cookie',
 		'RequestHandler',
@@ -88,8 +86,8 @@ class AppController extends Controller {
  * @return void
  */	
 	public function beforeFilter() {
-		//$this->Auth->allow();
 		parent::beforeFilter();
+
 		$this->Cookie->name = 'JobSheets';
 	    $this->Cookie->time = 7 * 24 * 60 * 60;    // 7 days
 	    $this->Cookie->path = '/';
@@ -108,7 +106,29 @@ class AppController extends Controller {
  * @return void
  */	
 	public function beforeRender() {
-		$this->set('__cookie', $this->Cookie->read('session'));
+		$session = $this->Session->read('Auth.User');
+		if ($session) {
+			if ($session['Client']['status'] == 0 && $this->action != 'account') {
+				$this->Flash->error(__('Your account is no longer active. Please contact us directly.'));
+				$this->redirect(array('controller' => 'clients', 'action' => 'account'));
+			}
+			if (isset($session['Client']['created']) && $session['Client']['acc'] == 'trial' && $this->action != 'account') {
+				$startdate = new DateTime(date('Y-m-d', strtotime($session['Client']['created'])));
+				$start_acc_date = strtotime($startdate->format('Y-m-d'));
+				$enddate = $startdate->modify(sprintf('+%s day', $session['Client']['acc_days']));
+				$end_acc_date = strtotime($enddate->format('Y-m-d'));
+				$this->set(compact('start_acc_date', 'end_acc_date'));
+				if (time() > $end_acc_date) {
+					if ($session['role_id'] < 3) {
+						$this->Flash->warning(__('Your trial account has expired. Please select one of our products to continue using JobSheets.'));
+						$this->redirect(array('controller' => 'clients', 'action' => 'account'));
+					} else {
+						$this->Flash->errorLogin(__('Your trial account has expired. Please contact your employer.'));
+						$this->redirect(array('controller' => 'users', 'action' => 'logout'));
+					}
+				}
+			}
+		}
 	}
 		
 /**

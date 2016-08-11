@@ -27,7 +27,7 @@
 	<?php echo $this->Html->css(array(
     'http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.css',
-    'css_styles.min',));?>
+    'css_styles.min', 'common',));?>
 	<?php echo $this->fetch('css');?>
 </head>
 <body>
@@ -41,7 +41,6 @@
         <div class="navbar-header pull-left">
         	<?php echo $this->Html->link($this->Html->image('jobsheets-logo-sm.png', array('alt' => __('JobSheets'))), '/', array('class' => 'navbar-brand', 'escape' => false));?>
         </div>
-
         <?php echo $this->Module->load('usermenu');?>
     </header>
 
@@ -80,8 +79,8 @@
     </div>
     <?php echo $this->Html->scriptBlock('var _baseurl = \'' . $this->webroot . '\';');?>
     <?php echo $this->Html->script(array(
-    'jquery-1.10.2.min', 
-    'jqueryui-1.10.3.min', 
+    'jquery-3.1.0.min', 
+    'jqueryui-1.12.0.min', 
     'bootstrap.min', 
     'enquire',
     'application'));?>

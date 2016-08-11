@@ -39,4 +39,4 @@
     </div>
 </div>
 <?php echo $this->Form->end();?>
-<?php echo $this->Html->script(array('jquery-1.10.2.min', 'user.reset'), array('inline' => false));?>
+<?php echo $this->Html->script(array('jquery-3.1.0.min', 'user.reset'), array('inline' => false));?>

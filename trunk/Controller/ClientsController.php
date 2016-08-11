@@ -26,7 +26,7 @@ App::uses('AppController', 'Controller');
 
 class ClientsController extends AppController {
 
-	public $components = array('Upload');
+	public $components = array('Upload', 'PayPalSDK');
 
 /**
  * Before Filter method
@@ -36,7 +36,6 @@ class ClientsController extends AppController {
  * @return void
  */
 	public function beforeFilter() {
-		$this->Security->unlockedActions = array('get');
 		parent::beforeFilter();
 	}
 
@@ -121,12 +120,66 @@ class ClientsController extends AppController {
 			}
 		}
 		$this->request->data = $this->Client->findClient($this->Session->read('Auth.User.client_id'));
-		$this->set('plans', $this->Client->Plan->findPlans());
+		$this->set('plans', $this->Client->Plan->getAllPlans());
 		$this->loadModel('Tax');
 		$this->set('taxes', $this->Tax->find('list'));
 		$this->set('title_for_layout', __('My Account'));
 	}
 
+/**
+ * subscribe to a plan method
+ *
+ * @return void
+ */
+	public function subscribe($planId = false) {
+		$this->Client->id = $this->Session->read('Auth.User.Client.id');
+		if (!$this->Client->exists()) {
+			throw new NotFoundException(__('Invalid client'));
+		}
+		$plan = $this->Client->Plan->findByBillingPlanId($planId);
+		if (!$plan) {
+			throw new NotFoundException(__('Invalid plan'));	
+		}
+		if ($this->request->is('post')) {
+			$this->Client->subscribe_validate();
+			$this->Client->set($this->request->data['CC']);
+			if ($this->Client->validates()){
+				$data = $this->Client->read(null, $this->Client->id);
+				$cc = isset($this->request->data['CC'])? $this->request->data['CC']: array();
+				$agreement = $this->PayPalSDK->createAgreement($planId, $this->request->data['CC']['method'], $cc, $data);
+				if ($agreement) {
+					$this->Client->saveField('subscription_id', $argeement['id']);
+					$this->Flash->success(__('Your billing agreement has been created. Thank you!'));
+					if(!empty($agreement['link'])) {
+						$this->redirect($agreement['link']);		
+					}
+				} else {
+					$this->Flash->error(__('There was an error. Please, try again.'));
+				}
+			} else {
+				$this->set('errors', $this->Client->validationErrors);
+				$this->Flash->error(__('Please fix the errors below and try again.'));
+			}
+			unset($this->request->data);
+		}
+		$this->set(compact('plan'));
+		$this->set('title_for_layout', __('Subscribe'));
+	}
+
+/**
+ * deactivate method
+ *
+ * @return void
+ */
+	public function deactivate() {
+		$this->Client->id = $this->Session->read('Auth.User.Client.id');
+		if (!$this->Client->exists()) {
+			throw new NotFoundException(__('Invalid client'));
+		}
+		$this->Client->saveField('status', 0);
+		$this->Session->write('Auth.User.Client.status', 0);
+		$this->redirect($this->referer());
+	}
 
 /**
  * save client logo
@@ -141,7 +194,7 @@ class ClientsController extends AppController {
 			if ($file) {
 				$this->Client->id = $id;
 				$this->Client->saveField('logo', 'logo' . DS . $file);
-				$this->Session->write('Auth.Client.logo', 'logo' . DS . $file);
+				$this->Session->write('Auth.User.Client.logo', 'logo' . DS . $file);
 			} else {
 				return false;
 			}

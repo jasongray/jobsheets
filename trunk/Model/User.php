@@ -222,7 +222,7 @@ class User extends AppModel {
 		$this->data['Client']['status'] = 0; // un verified status		
 		$this->data['Client']['userlimit'] = 4; // trial user limit...		
 		$this->data['Client']['acc'] = 'trial'; // trial status period
-		$this->data['Client']['acc_days'] = 14; // trial days period
+		$this->data['Client']['acc_days'] = 30; // trial days period
 
 		// save client data and return the id
 		if ($this->Client->save($this->data['Client'])) {

@@ -1,10 +1,7 @@
 <?php echo $this->Form->input('name', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Name'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
 <?php echo $this->Form->input('description', array('div' => 'form-group', 'class' => 'form-control wysiwyg', 'label' => array('text' => __('Description'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
 <?php echo $this->Form->input('userlimit', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('User Limit'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
-<?php echo $this->Form->input('type', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('Type'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
-<?php echo $this->Form->input('billing', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('Billing Amt'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>')); ?>
-<?php echo $this->Form->input('period', array('div' => 'form-group wysiwyg', 'class' => 'form-control', 'label' => array('text' => __('Frequency'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'options' => array(1 => __('Monthly'), 2 => __('BiMonthly'), 4 => __('Quarterly'), 12 => __('Annually')))); ?>
-<?php echo $this->Form->input('active', array('div' => 'form-group', 'class' => 'form-control', 'label' => array('text' => __('Status'), 'class' => 'col-md-2 control-label'), 'between' => '<div class="col-md-10">', 'after' => '</div>', 'empty' => '', 'options' => array(0 => 'Retired', 1 => 'Active'))); ?>
+
 <?php echo $this->start('panel-footer');?>
 <div class="panel-footer">
 	<div class="row">

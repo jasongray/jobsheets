@@ -46,7 +46,7 @@
 </div>
 <?php echo $this->Form->end();?>
 <?php echo $this->Html->css(array('plugins/select2.min.css'), array('inline' => false));?>
-<?php echo $this->Html->script(array('jquery-1.10.2.min', 'bootstrap.min', 'plugins/select2/select2.min.js'), array('inline' => false));?>
+<?php echo $this->Html->script(array('jquery-3.1.0.min', 'bootstrap.min', 'plugins/select2/select2.min.js'), array('inline' => false));?>
 <?php echo $this->Html->scriptBlock("
 $(document).ready(function() {
     $('.select2').select2();

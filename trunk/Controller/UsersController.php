@@ -128,7 +128,12 @@ class UsersController extends AppController {
 				$this->User->id = $this->Session->read('Auth.User.id');
 				$this->User->saveField('lastactive', date('Y-m-d H:i:s'));
 				$this->Cookie->write('session', $this->User->encrypt($this->User->id));
-				return $this->redirect($this->Auth->redirectUrl());
+				if (empty($this->Session->read('Auth.User.lastactive')) && $this->Session->read('Auth.User.role_id') < 3) {
+					$this->Flash->info(__('Complete your profile information.'));
+					return $this->redirect(array('controller' => 'clients', 'action' => 'account'));
+				} else {
+					return $this->redirect($this->Auth->redirectUrl());
+				}
 			} else {
 				$this->Flash->loginError(__('Incorrect Username and/or Password.'));
 				$this->redirect(array('controller' => 'users', 'action' => 'login'));
