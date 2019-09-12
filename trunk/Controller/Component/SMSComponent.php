@@ -32,10 +32,10 @@ class SMSComponent extends Component {
  * @var array
  */
 	public $settings = array(
-		'Account' => 'EX0212816',
-		'Login' => 'jason@webwidget.com.au',
-		'Password' => 'e7vQ3dmLh3f5',
-		'SendID' => 'JobSheets'
+		'Account' => '',
+		'Login' => '',
+		'Password' => '',
+		'SendID' => ''
 	);
 
 /** 
